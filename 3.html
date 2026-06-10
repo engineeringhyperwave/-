@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>大馬深夜提款機 v3.0</title>
+
+<style>
+:root{
+    --bg:#141414;
+    --card:#1f1f1f;
+    --blue:#1890ff;
+    --green:#52c41a;
+    --red:#ff4d4f;
+    --yellow:#faad14;
+    --text:#ffffff;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:Segoe UI,sans-serif;
+    margin:0;
+    padding:20px;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:var(--blue);
+}
+
+.card{
+    background:var(--card);
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:20px;
+}
+
+.status{
+    text-align:center;
+    border-left:8px solid #666;
+}
+
+.time{
+    font-size:2rem;
+    font-family:monospace;
+    font-weight:bold;
+}
+
+.statusText{
+    margin-top:10px;
+    font-size:1.1rem;
+}
+
+.input-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+label{
+    display:block;
+    margin-bottom:5px;
+    color:#aaa;
+    font-size:0.9rem;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #444;
+    background:#262626;
+    color:white;
+    box-sizing:border-box;
+}
+
+.result-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-top:15px;
+}
+
+.box{
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+}
+
+.tp{
+    background:#112614;
+    border:1px solid var(--green);
+}
+
+.sl{
+    background:#2a1215;
+    border:1px solid var(--red);
+}
+
+.custom{
+    background:#142436;
+    border:1px solid var(--blue);
+}
+
+.value{
+    font-size:1.5rem;
+    font-family:monospace;
+    font-weight:bold;
+    margin-top:8px;
+}
+
+.total{
+    display:flex;
+    justify-content:space-between;
+    margin-top:15px;
+    color:#ccc;
+}
+
+button{
+    width:100%;
+    margin-top:15px;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:var(--blue);
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>💸 大馬深夜提款機 v3.0</h1>
+
+<div class="card status" id="statusCard">
+    <div class="time" id="liveTime">00:00:00</div>
+    <div id="statusText">市場狀態檢測中...</div>
+</div>
+
+<div class="card">
+
+<div class="input-grid">
+
+<div>
+<label>買入價格 USD</label>
+<input type="number" id="buyPrice" step="0.01">
+</div>
+
+<div>
+<label>股數</label>
+<input type="number" id="shares" value="50">
+</div>
+
+<div>
+<label>匯率 USD/MYR</label>
+<input type="number" id="fxRate" value="4.70" step="0.01">
+</div>
+
+<div>
+<label>止盈 %</label>
+<input type="number" id="tpPercent" value="3" step="0.1">
+</div>
+
+<div>
+<label>止損 %</label>
+<input type="number" id="slPercent" value="1.5" step="0.1">
+</div>
+
+<div>
+<label>自定義 %</label>
+<input type="number" id="customPercent" value="5" step="0.1">
+</div>
+
+</div>
+
+<button onclick="calculate()">
+立即計算
+</button>
+
+<div class="total">
+<div>本金 USD：<b id="usdCapital">0</b></div>
+<div>本金 MYR：<b id="myrCapital">0</b></div>
+</div>
+
+<div class="result-grid">
+
+<div class="box tp">
+<div>🎯 止盈價</div>
+<div class="value" id="tpPrice">--</div>
+<div id="tpProfit">0</div>
+</div>
+
+<div class="box sl">
+<div>🛑 止損價</div>
+<div class="value" id="slPrice">--</div>
+<div id="slLoss">0</div>
+</div>
+
+</div>
+
+<div class="result-grid">
+
+<div class="box custom">
+<div>⚡ 自定義目標價</div>
+<div class="value" id="customPrice">--</div>
+<div id="customProfit">0</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function updateClock(){
+
+    const now = new Date();
+
+    const h = String(now.getHours()).padStart(2,"0");
+    const m = String(now.getMinutes()).padStart(2,"0");
+    const s = String(now.getSeconds()).padStart(2,"0");
+
+    document.getElementById("liveTime").innerText =
+        `${h}:${m}:${s}`;
+
+    const total =
+        now.getHours()*60 +
+        now.getMinutes();
+
+    const card =
+        document.getElementById("statusCard");
+
+    const text =
+        document.getElementById("statusText");
+
+    if(total >= 1290 && total < 1320){
+
+        card.style.borderLeftColor="#ff4d4f";
+
+        text.innerHTML=
+        "❌ 散戶混亂期<br>避免追高殺低";
+
+    }
+    else if(total >=1320 && total <1350){
+
+        card.style.borderLeftColor="#52c41a";
+
+        text.innerHTML=
+        "🟢 趨勢確立期<br>觀察突破方向";
+
+    }
+    else if(total >=1350 || total <240){
+
+        card.style.borderLeftColor="#faad14";
+
+        text.innerHTML=
+        "🌙 睡覺流時間<br>交給系統管理";
+
+    }
+    else{
+
+        card.style.borderLeftColor="#666";
+
+        text.innerHTML=
+        "💤 美股未開盤";
+
+    }
+
+}
+
+function calculate(){
+
+    const buyPrice =
+        parseFloat(
+            document.getElementById("buyPrice").value
+        );
+
+    const shares =
+        parseFloat(
+            document.getElementById("shares").value
+        );
+
+    const fxRate =
+        parseFloat(
+            document.getElementById("fxRate").value
+        );
+
+    const tpPercent =
+        parseFloat(
+            document.getElementById("tpPercent").value
+        );
+
+    const slPercent =
+        parseFloat(
+            document.getElementById("slPercent").value
+        );
+
+    const customPercent =
+        parseFloat(
+            document.getElementById("customPercent").value
+        );
+
+    if(
+        isNaN(buyPrice) ||
+        isNaN(shares) ||
+        buyPrice<=0 ||
+        shares<=0
+    ){
+        return;
+    }
+
+    const capitalUsd =
+        buyPrice * shares;
+
+    const capitalMyr =
+        capitalUsd * fxRate;
+
+    document.getElementById("usdCapital")
+        .innerText =
+        "$"+capitalUsd.toFixed(2);
+
+    document.getElementById("myrCapital")
+        .innerText =
+        capitalMyr.toFixed(0);
+
+
+
+    /* 止盈 */
+
+    const tpPrice =
+        buyPrice *
+        (1 + tpPercent/100);
+
+    const tpProfitUsd =
+        (tpPrice-buyPrice)*
+        shares;
+
+    const tpProfitMyr =
+        tpProfitUsd *
+        fxRate;
+
+    document.getElementById("tpPrice")
+        .innerText =
+        "$"+tpPrice.toFixed(2);
+
+    document.getElementById("tpProfit")
+        .innerHTML =
+        `+${tpProfitUsd.toFixed(2)} USD (${tpProfitMyr.toFixed(0)} MYR)`;
+
+
+
+    /* 止損 */
+
+    const slPrice =
+        buyPrice *
+        (1 - slPercent/100);
+
+    const slLossUsd =
+        (buyPrice-slPrice)*
+        shares;
+
+    const slLossMyr =
+        slLossUsd *
+        fxRate;
+
+    document.getElementById("slPrice")
+        .innerText =
+        "$"+slPrice.toFixed(2);
+
+    document.getElementById("slLoss")
+        .innerHTML =
+        `-${slLossUsd.toFixed(2)} USD (${slLossMyr.toFixed(0)} MYR)`;
+
+
+
+    /* 自定義 */
+
+    const customPrice =
+        buyPrice *
+        (1 + customPercent/100);
+
+    const customUsd =
+        Math.abs(
+            (customPrice-buyPrice)
+            * shares
+        );
+
+    const customMyr =
+        customUsd *
+        fxRate;
+
+    document.getElementById("customPrice")
+        .innerText =
+        "$"+customPrice.toFixed(2);
+
+    if(customPercent >= 0){
+
+        document.getElementById("customProfit")
+        .innerHTML =
+        `+${customUsd.toFixed(2)} USD (${customMyr.toFixed(0)} MYR)`;
+
+    }else{
+
+        document.getElementById("customProfit")
+        .innerHTML =
+        `-${customUsd.toFixed(2)} USD (${customMyr.toFixed(0)} MYR)`;
+
+    }
+
+}
+
+
+
+/* 自動更新 */
+
+setInterval(updateClock,1000);
+
+updateClock();
+
+document
+.querySelectorAll("input")
+.forEach(item=>{
+
+    item.addEventListener(
+        "input",
+        calculate
+    );
+
+});
+
+</script>
+
+</body>
+</html>
