@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大馬深夜提款機 v2.1 - 核心美金當冲面板</title>
+    <title>大馬深夜提款機 - 自定義當冲決策面板</title>
     <style>
         :root {
             --danger-color: #ff4d4f;
             --success-color: #52c41a;
             --warning-color: #faad14;
+            --primary-color: #1890ff;
             --bg-color: #141414;
             --card-bg: #1f1f1f;
             --text-color: #ffffff;
-            --primary-color: #1890ff;
         }
 
         body {
@@ -34,12 +34,14 @@
         h1 {
             text-align: center;
             color: var(--primary-color);
-            margin-bottom: 5px;
+            margin-bottom: 20px;
         }
 
-        /* 新增：跳转按钮样式 */
+        /* 新增：導航按鈕樣式 */
         .nav-btn-container {
-            text-align: center;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
             margin-bottom: 20px;
         }
         
@@ -47,12 +49,15 @@
             background-color: transparent;
             color: var(--primary-color);
             border: 1px solid var(--primary-color);
-            padding: 8px 16px;
+            padding: 10px 20px;
             font-size: 0.9rem;
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
         }
 
         .nav-btn:hover {
@@ -61,6 +66,7 @@
             box-shadow: 0 0 10px rgba(24, 144, 255, 0.5);
         }
 
+        /* 時間狀態燈號樣式 */
         .status-card {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -79,15 +85,8 @@
         .time-display {
             font-size: 2rem;
             font-weight: bold;
-            margin-bottom: 5px;
-            font-family: monospace;
-        }
-
-        .season-display {
-            font-size: 0.8rem;
-            color: var(--primary-color);
             margin-bottom: 10px;
-            font-weight: bold;
+            font-family: monospace;
         }
 
         .status-text {
@@ -95,11 +94,13 @@
             font-weight: bold;
         }
 
+        /* 計算器樣式 */
         .calc-card {
             background-color: var(--card-bg);
             border-radius: 12px;
             padding: 25px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: 1px solid #333;
         }
 
         .form-group {
@@ -151,10 +152,7 @@
 
         .tp-box { background-color: #112614; border: 1px solid var(--success-color); }
         .sl-box { background-color: #2a1215; border: 1px solid var(--danger-color); }
-        
-        /* 自定义框的基础样式，颜色会通过 JS 动态调整 */
-        .custom-box { background-color: #142436; border: 1px solid #177ddc; transition: all 0.3s ease; }
-        .custom-box.is-sl { background-color: #25162b; border: 1px solid #b37feb; } /* 负数时变紫色小调 */
+        .custom-box { background-color: #142436; border: 1px solid #177ddc; }
 
         .result-val {
             font-size: 1.5rem;
@@ -164,15 +162,17 @@
         }
 
         .section-title {
-            color: #666;
+            color: #8c8c8c;
             font-size: 0.85rem;
             font-weight: bold;
             text-transform: uppercase;
-            margin-top: 15px;
+            margin-top: 20px;
             border-bottom: 1px solid #333;
             padding-bottom: 5px;
+            display: block;
         }
 
+        /* 絕對需要的救命設定卡片 */
         .alert-card {
             background-color: #142436;
             border: 1px solid #177ddc;
@@ -188,76 +188,71 @@
 <body>
 
 <div class="container">
-    <h1>大馬深夜提款機 💸 v2.1</h1>
-    
+    <h1>大馬深夜提款機 💸</h1>
+
+    <!-- 跳轉按鈕區域 -->
     <div class="nav-btn-container">
-        <button class="nav-btn" onclick="window.location.href='count.html'">📊 前往復盤/計算頁 (count.html)</button>
+        <button class="nav-btn" onclick="window.location.href='count.html'">📊 復盤頁 (count)</button>
+        <button class="nav-btn" onclick="window.location.href='3.html'">🚀 前往 V3 (3.html)</button>
     </div>
 
+    <!-- 1. 時間狀態提示箱 -->
     <div id="statusCard" class="status-card">
         <div class="time-display" id="liveTime">00:00:00</div>
-        <div class="season-display" id="seasonText">正在檢測美股交易時制...</div>
         <div class="status-text" id="statusText">正在初始化市場時間...</div>
     </div>
 
+    <!-- 2. 當冲黃金計算器 -->
     <div class="calc-card">
         <div class="form-group">
-            <label>選擇交易標的</label>
+            <label>選擇交易標的 (連動自動爆倉清算提醒)</label>
             <select id="ticker" onchange="calculate()">
                 <option value="TQQQ">TQQQ (三倍做多納指)</option>
                 <option value="SQQQ">SQQQ (三倍做空納指)</option>
             </select>
         </div>
         
+        <!-- 輸入區域 -->
         <div class="input-row">
             <div>
-                <label>💰 擬買入美金價格 (USD)</label>
-                <input type="number" id="buyPrice" step="0.01" placeholder="例如: 83.00" oninput="calculate()">
+                <label>💰 美金買入價格</label>
+                <input type="number" id="buyPrice" step="0.01" placeholder="例如: 50.25" oninput="calculate()">
             </div>
             <div>
-                <label>🔢 擬購買股數 (Shares)</label>
-                <input type="number" id="sharesInput" value="50" step="5" oninput="calculate()">
+                <label>⚙️ 自定義止盈 % 數</label>
+                <input type="number" id="customPercent" step="0.1" value="5.0" placeholder="例如: 5" oninput="calculate()">
             </div>
         </div>
 
-        <div class="form-group">
-            <label>⚙️ 自定義止盈/止損 % 數 (输入负数如 -1 即为止损)</label>
-            <input type="number" id="customPercent" step="0.1" value="5.0" placeholder="例如: 5 或 -1.5" oninput="calculate()">
-        </div>
-
-        <div class="form-group" style="margin-top: -5px; margin-bottom: 15px;">
-            <div style="font-size: 0.85rem; color: #8c8c8c; display: flex; justify-content: space-between;">
-                <span>所需美金本金: <b id="usdTotal" style="color: #1890ff;">$0.00</b></span>
-                <span>折合馬幣資金: <b id="myrTotal" style="color: #faad14;">0 MYR</b> (汇率按4.70)</span>
-            </div>
-        </div>
-
+        <!-- 自動計算結果：核心策略 (3% / 1.5%) -->
         <div class="section-title">🛡️ 核心鋼鐵策略 (賺 3% / 賠 1.5%)</div>
         <div class="result-grid">
             <div class="result-box tp-box">
                 <div style="color: var(--success-color); font-weight: bold;">🎯 核心止盈 (3%)</div>
                 <div class="result-val" id="tpPrice" style="color: #73d13d;">--</div>
-                <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">利潤: +<span id="tpUsd">0</span> USD (<span id="tpMyr">0</span> MYR)</div>
+                <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">利潤約: +300 MYR</div>
             </div>
             <div class="result-box sl-box">
                 <div style="color: var(--danger-color); font-weight: bold;">🛑 鋼鐵止損 (1.5%)</div>
                 <div class="result-val" id="slPrice" style="color: #ff7875;">--</div>
-                <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">損失: -<span id="slUsd">0</span> USD (<span id="slMyr">0</span> MYR)</div>
+                <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">損失約: -150 MYR</div>
             </div>
         </div>
 
-        <div class="section-title">🚀 自定義行情追蹤</div>
+        <!-- 自動計算結果：自定義大行情追蹤 -->
+        <div class="section-title">🚀 自定義大行情追蹤</div>
         <div class="result-grid" style="grid-template-columns: 1fr;">
-            <div id="customBox" class="result-box custom-box">
-                <div id="customTitle" style="color: #69c0ff; font-weight: bold;">⚡ 自定義止盈價 (<span id="customLabel">5</span>%)</div>
+            <div class="result-box custom-box">
+                <div style="color: #69c0ff; font-weight: bold;">⚡ 自定義止盈價 (<span id="customLabel">5</span>%)</div>
                 <div class="result-val" id="customPrice" style="color: #40a9ff;">--</div>
-                <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;"><span id="customProfitText">預估利潤</span>: <span id="customSign">+</span><span id="customUsd">0</span> USD (<span id="customMyr">0</span> MYR)</div>
+                <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">預估利潤: 約 +<span id="customMyr">500</span> MYR</div>
             </div>
         </div>
     </div>
 
+    <!-- 3. 系統核心提示 -->
     <div class="alert-card">
-        <div style="font-weight: bold; color: #177ddc; font-size: 1rem; margin-bottom: 5px;">⚠️ 睡覺前 Moomoo 必備鋼鐵設定：</div>
+        <div style="font-weight: bold; color: #177ddc; font-size: 1rem; margin-bottom: 5px;">⚠️ 10:30 去睡覺前，Moomoo 必備鋼鐵設定：</div>
         <ul>
             <li><strong>訂單類型：</strong>必須選 <strong>OCO (組合訂單)</strong>。</li>
             <li><strong>止損訂單類型：</strong>務必選 <strong>止損市價單 (Stop Market)</strong>，防止半夜暴跌跳空卡單！</li>
@@ -268,16 +263,6 @@
 </div>
 
 <script>
-    function isDST() {
-        const today = new Date();
-        const year = today.getFullYear();
-        const mar = new Date(year, 2, 8);
-        const marDst = new Date(year, 2, 8 + (7 - mar.getDay()) % 7, 2);
-        const nov = new Date(year, 10, 1);
-        const novDst = new Date(year, 10, 1 + (7 - nov.getDay()) % 7, 2);
-        return today >= marDst && today < novDst;
-    }
-
     function updateMarketStatus() {
         const now = new Date();
         const hours = now.getHours();
@@ -285,111 +270,63 @@
         const seconds = now.getSeconds();
         
         const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        document.getElementById('liveTime').innerText = timeStr;
+        const liveTimeEl = document.getElementById('liveTime');
+        if(liveTimeEl) liveTimeEl.innerText = timeStr;
 
         const card = document.getElementById('statusCard');
         const text = document.getElementById('statusText');
-        const seasonText = document.getElementById('seasonText');
-        
-        const isSummer = isDST();
-        seasonText.innerText = isSummer ? "☀️ 當前時制：美股夏令時 (大馬 21:30 開盤)" : "❄️ 當前時制：美股冬令時 (大馬 22:30 開盤)";
-
         const totalMinutes = hours * 60 + minutes;
-        let offset = isSummer ? 0 : 60;
 
-        if (totalMinutes >= (1290 + offset) && totalMinutes < (1320 + offset)) {
+        if (totalMinutes >= 1290 && totalMinutes < 1320) { 
             card.className = "status-card status-danger";
             text.innerHTML = "❌ 散戶與混亂期（不穩）<br><span style='font-size:0.9rem; font-weight:normal; color:#ffccc7;'>大資金正在洗盤，千萬不要手癢進場！</span>";
-        } else if (totalMinutes >= (1320 + offset) && totalMinutes < (1350 + offset)) {
+        } else if (totalMinutes >= 1320 && totalMinutes < 1350) { 
             card.className = "status-card status-success";
             text.innerHTML = "🟢 趨勢確立期（最穩妥）<br><span style='font-size:0.9rem; font-weight:normal; color:#d9f7be;'>機構大單已確認方向，準備觀察突破進場！</span>";
-        } else if (totalMinutes >= (1350 + offset) || totalMinutes < (240 + offset)) {
+        } else if (totalMinutes >= 1350 || totalMinutes < 240) { 
             card.className = "status-card status-warning";
-            text.innerHTML = "🌙 市場運行期（睡覺流時間）<br><span style='font-size:0.9rem; font-weight:normal; color:#ffe7ba;'>交給 Moomoo 系統自动跑，請去安心睡覺。</span>";
+            text.innerHTML = "🌙 市場運行期（睡覺流時間）<br><span style='font-size:0.9rem; font-weight:normal; color:#ffe7ba;'>交給 Moomoo 系統自動跑，請去安心睡覺。</span>";
         } else {
             card.className = "status-card";
-            text.innerHTML = "💤 美股未開盤<br><span style='font-size:0.9rem; font-weight:normal; color:#aaa;'>養精蓄銳，等開盤前再戰。</span>";
+            text.innerHTML = "💤 美股未開盤<br><span style='font-size:0.9rem; font-weight:normal; color:#aaa;'>養精蓄銳，等今晚 21:30 再戰。</span>";
         }
     }
 
     function calculate() {
-        const buyPrice = parseFloat(document.getElementById('buyPrice').value);
-        const shares = parseInt(document.getElementById('sharesInput').value);
-        const customPct = parseFloat(document.getElementById('customPercent').value);
+        const buyPriceInput = document.getElementById('buyPrice');
+        const customPercentInput = document.getElementById('customPercent');
         
-        const fxRate = 4.70; 
+        if (!buyPriceInput || !customPercentInput) return;
 
-        if (isNaN(buyPrice) || buyPrice <= 0 || isNaN(shares) || shares <= 0) {
+        const buyPrice = parseFloat(buyPriceInput.value);
+        const customPct = parseFloat(customPercentInput.value);
+
+        if (isNaN(buyPrice) || buyPrice <= 0) {
             document.getElementById('tpPrice').innerText = "--";
             document.getElementById('slPrice').innerText = "--";
             document.getElementById('customPrice').innerText = "--";
-            document.getElementById('usdTotal').innerText = "$0.00";
-            document.getElementById('myrTotal').innerText = "0 MYR";
             return;
         }
 
-        const totalUsdCost = buyPrice * shares;
-        const totalMyrCost = totalUsdCost * fxRate;
-        document.getElementById('usdTotal').innerText = `$${totalUsdCost.toFixed(2)}`;
-        document.getElementById('myrTotal').innerText = `${Math.round(totalMyrCost)}`;
-
-        // 1. 核心策略价格计算 (+3% / -1.5%)
+        // 1. 核心策略計算 (+3% / -1.5%)
         const tp = buyPrice * 1.03;
         const sl = buyPrice * 0.985;
         document.getElementById('tpPrice').innerText = `$${tp.toFixed(2)}`;
         document.getElementById('slPrice').innerText = `$${sl.toFixed(2)}`;
 
-        const tpUsdGain = shares * (tp - buyPrice);
-        const slUsdLoss = shares * (buyPrice - sl);
-        document.getElementById('tpUsd').innerText = tpUsdGain.toFixed(2);
-        document.getElementById('slUsd').innerText = slUsdLoss.toFixed(2);
-        document.getElementById('tpMyr').innerText = Math.round(tpUsdGain * fxRate);
-        document.getElementById('slMyr').innerText = Math.round(slUsdLoss * fxRate);
-
-        // 2. 升级版：自定義百分比計算（兼容正負數）
+        // 2. 自定義百分比計算
         const pct = isNaN(customPct) ? 0 : customPct;
         document.getElementById('customLabel').innerText = pct;
         
         const customTpPrice = buyPrice * (1 + (pct / 100));
         document.getElementById('customPrice').innerText = `$${customTpPrice.toFixed(2)}`;
 
-        const customBox = document.getElementById('customBox');
-        const customTitle = document.getElementById('customTitle');
-        const customProfitText = document.getElementById('customProfitText');
-        const customSign = document.getElementById('customSign');
-        const customPriceElement = document.getElementById('customPrice');
-
-        // 计算差额
-        const rawGain = customTpPrice - buyPrice;
-        const customUsdGain = Math.abs(shares * rawGain);
-        const customMyrGain = Math.abs(customUsdGain * fxRate);
-
-        if (pct >= 0) {
-            // 正数：止盈逻辑
-            customBox.className = "result-box custom-box";
-            customBox.style.borderColor = "#177ddc";
-            customBox.style.backgroundColor = "#142436";
-            customTitle.style.color = "#69c0ff";
-            customTitle.innerHTML = `⚡ 自定義止盈價 (<span>${pct}</span>%)`;
-            customPriceElement.style.color = "#40a9ff";
-            customProfitText.innerText = "預估利潤";
-            customSign.innerText = "+";
-        } else {
-            // 负数：智能转换为止损逻辑
-            customBox.className = "result-box custom-box is-sl";
-            customBox.style.borderColor = "#b37feb";
-            customBox.style.backgroundColor = "#25162b";
-            customTitle.style.color = "#d3adf7";
-            customTitle.innerHTML = `🛑 自定義止損價 (<span>${pct}</span>%)`;
-            customPriceElement.style.color = "#ff7875";
-            customProfitText.innerText = "預估損失";
-            customSign.innerText = "-";
-        }
-
-        document.getElementById('customUsd').innerText = customUsdGain.toFixed(2);
-        document.getElementById('customMyr').innerText = Math.round(customMyrGain);
+        // 3. 預估馬幣利潤
+        const estMyr = (pct / 3) * 300;
+        document.getElementById('customMyr').innerText = isNaN(estMyr) ? "0" : Math.round(estMyr);
     }
 
+    // 初始化
     setInterval(updateMarketStatus, 1000);
     updateMarketStatus();
 </script>
