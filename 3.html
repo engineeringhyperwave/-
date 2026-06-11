@@ -1,450 +1,268 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大馬深夜提款機 V3.5 - 交易結算中心</title>
+    <style>
+        :root {
+            --bg: #0b1120;
+            --card: #1e293b;
+            --blue: #38bdf8;
+            --green: #4ade80;
+            --red: #fb7185;
+            --yellow: #fbbf24;
+            --text: #f1f5f9;
+        }
 
-<title>大馬深夜提款機 v3.0</title>
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
 
-<style>
-:root{
-    --bg:#141414;
-    --card:#1f1f1f;
-    --blue:#1890ff;
-    --green:#52c41a;
-    --red:#ff4d4f;
-    --yellow:#faad14;
-    --text:#ffffff;
-}
+        .container { width: 100%; max-width: 900px; }
 
-body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:Segoe UI,sans-serif;
-    margin:0;
-    padding:20px;
-}
+        h1 { text-align: center; color: var(--blue); font-size: 1.8rem; margin: 10px 0; }
 
-.container{
-    max-width:700px;
-    margin:auto;
-}
+        /* 頂部按鈕 */
+        .nav-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .nav-btn {
+            flex: 1; padding: 12px; border-radius: 15px; border: 1px solid var(--blue);
+            background: rgba(56, 189, 248, 0.1); color: var(--blue);
+            text-align: center; text-decoration: none; font-weight: bold; font-size: 0.9rem;
+        }
+        .nav-btn:hover { background: var(--blue); color: white; }
 
-h1{
-    text-align:center;
-    color:var(--blue);
-}
+        /* 佈局：左側計算，右側參考表 */
+        .main-layout { display: flex; gap: 20px; flex-wrap: wrap; }
+        .calc-section { flex: 2; min-width: 300px; }
+        .info-section { flex: 1; min-width: 250px; }
 
-.card{
-    background:var(--card);
-    border-radius:12px;
-    padding:20px;
-    margin-bottom:20px;
-}
+        .card {
+            background: var(--card); border-radius: 20px; padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); margin-bottom: 20px;
+        }
 
-.status{
-    text-align:center;
-    border-left:8px solid #666;
-}
+        /* 表單樣式 */
+        .grid-input { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full-width { grid-column: span 2; }
+        .input-group { display: flex; flex-direction: column; margin-bottom: 10px; }
+        label { font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px; font-weight: bold; }
+        input {
+            background: #0f172a; border: 1px solid #334155; color: white;
+            padding: 12px; border-radius: 12px; font-size: 1rem; outline: none;
+        }
+        input:focus { border-color: var(--blue); }
 
-.time{
-    font-size:2rem;
-    font-family:monospace;
-    font-weight:bold;
-}
+        /* RSI 參考表樣式 */
+        .rsi-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .rsi-table th, .rsi-table td { padding: 8px; border-bottom: 1px solid #334155; text-align: center; }
+        .rsi-table th { color: var(--yellow); }
+        .row-high { color: var(--blue); font-weight: bold; }
+        .row-low { color: var(--red); font-weight: bold; }
 
-.statusText{
-    margin-top:10px;
-    font-size:1.1rem;
-}
+        /* 結算結果區域 */
+        .summary-box {
+            text-align: center; padding: 15px; border-radius: 15px;
+            background: rgba(0,0,0,0.2); border: 1px solid #334155; margin-top: 10px;
+        }
+        .record-btn {
+            width: 100%; background: var(--green); color: #064e3b; border: none;
+            padding: 15px; border-radius: 15px; font-weight: bold; font-size: 1rem;
+            margin-top: 15px; cursor: pointer;
+        }
 
-.input-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-}
-
-label{
-    display:block;
-    margin-bottom:5px;
-    color:#aaa;
-    font-size:0.9rem;
-}
-
-input{
-    width:100%;
-    padding:10px;
-    border-radius:6px;
-    border:1px solid #444;
-    background:#262626;
-    color:white;
-    box-sizing:border-box;
-}
-
-.result-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:15px;
-    margin-top:15px;
-}
-
-.box{
-    padding:15px;
-    border-radius:10px;
-    text-align:center;
-}
-
-.tp{
-    background:#112614;
-    border:1px solid var(--green);
-}
-
-.sl{
-    background:#2a1215;
-    border:1px solid var(--red);
-}
-
-.custom{
-    background:#142436;
-    border:1px solid var(--blue);
-}
-
-.value{
-    font-size:1.5rem;
-    font-family:monospace;
-    font-weight:bold;
-    margin-top:8px;
-}
-
-.total{
-    display:flex;
-    justify-content:space-between;
-    margin-top:15px;
-    color:#ccc;
-}
-
-button{
-    width:100%;
-    margin-top:15px;
-    padding:12px;
-    border:none;
-    border-radius:8px;
-    background:var(--blue);
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-button:hover{
-    opacity:0.9;
-}
-</style>
+        /* 歷史記錄表格 */
+        .history-table { width: 100%; font-size: 0.8rem; margin-top: 10px; border-collapse: collapse; }
+        .history-table th { background: #0f172a; padding: 10px; text-align: left; }
+        .history-table td { padding: 10px; border-bottom: 1px solid #334155; }
+        .win { color: var(--green); }
+        .loss { color: var(--red); }
+    </style>
 </head>
-
 <body>
 
 <div class="container">
+    <h1>深夜提款機 V3.5 結算中心</h1>
 
-<h1>💸 大馬深夜提款機 v3.0</h1>
+    <div class="nav-bar">
+        <a href="index.html" class="nav-btn">🏠 返回首頁</a>
+        <a href="count.html" class="nav-btn">📊 交易歷史與統計</a>
+    </div>
 
-<div class="card status" id="statusCard">
-    <div class="time" id="liveTime">00:00:00</div>
-    <div id="statusText">市場狀態檢測中...</div>
-</div>
+    <div class="main-layout">
+        <!-- 左側：計算與錄入 -->
+        <div class="calc-section">
+            <div class="card">
+                <div class="grid-input">
+                    <div class="input-group">
+                        <label>📅 交易日期</label>
+                        <input type="date" id="tradeDate">
+                    </div>
+                    <div class="input-group">
+                        <label>💱 結算匯率</label>
+                        <input type="number" id="fxRate" value="4.07" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label>💰 買入美金價</label>
+                        <input type="number" id="buyPrice" placeholder="0.00">
+                    </div>
+                    <div class="input-group">
+                        <label>💵 賣出美金價</label>
+                        <input type="number" id="sellPrice" placeholder="0.00">
+                    </div>
+                    <div class="input-group">
+                        <label>🔢 股數</label>
+                        <input type="number" id="shares" value="50">
+                    </div>
+                    <div class="input-group">
+                        <label>📈 進場 RSI</label>
+                        <input type="number" id="rsiVal" placeholder="例如 55">
+                    </div>
+                    <div class="input-group">
+                        <label>🧧 買入手續費 (USD)</label>
+                        <input type="number" id="buyFee" value="2.90">
+                    </div>
+                    <div class="input-group">
+                        <label>🧧 賣出手續費 (USD)</label>
+                        <input type="number" id="sellFee" value="2.32">
+                    </div>
+                </div>
 
-<div class="card">
+                <div class="summary-box">
+                    <div id="netUsd" style="font-size: 1.5rem; font-weight: bold;">$0.00 USD</div>
+                    <div id="netMyr" style="color: var(--yellow); font-size: 1.1rem;">0 MYR (淨利潤)</div>
+                </div>
 
-<div class="input-grid">
+                <button class="record-btn" onclick="saveRecord()">✅ 記錄這筆交易到 LocalStorage</button>
+            </div>
+        </div>
 
-<div>
-<label>買入價格 USD</label>
-<input type="number" id="buyPrice" step="0.01">
-</div>
+        <!-- 右側：RSI 快速參考表 -->
+        <div class="info-section">
+            <div class="card">
+                <label style="color: var(--blue); display: block; text-align: center; margin-bottom: 10px;">RSI 決策參考表</label>
+                <table class="rsi-table">
+                    <thead>
+                        <tr><th>RSI 區間</th><th>建議</th><th>勝率</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row-high"><td>>85</td><td>极端超买</td><td>68%</td></tr>
+                        <tr class="row-high"><td>70~85</td><td>超買</td><td>62%</td></tr>
+                        <tr class="row-high"><td>55~65</td><td>做多</td><td>55%</td></tr>
+                        <tr><td>46-54</td><td>觀望</td><td>50%</td></tr>
+                        <tr class="row-low"><td>35-45</td><td>做空</td><td>58%</td></tr>
+                        <tr class="row-low"><td>20~35</td><td>超賣</td><td>60%</td></tr>
+                        <tr class="row-low"><td>13~20</td><td>深度</td><td>67%</td></tr>
+                        <tr class="row-low"><td>13</td><td>极端超卖</td><td>68%</td></tr>
+                    </tbody>
+                </table>
+                <div style="font-size: 0.7rem; color: #64748b; margin-top: 15px; line-height: 1.4;">
+                    * 勝率基於 5 分鐘線統計。<br>
+                    * 買入手續費建議保留盈餘空間。
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div>
-<label>股數</label>
-<input type="number" id="shares" value="50">
-</div>
-
-<div>
-<label>匯率 USD/MYR</label>
-<input type="number" id="fxRate" value="4.70" step="0.01">
-</div>
-
-<div>
-<label>止盈 %</label>
-<input type="number" id="tpPercent" value="3" step="0.1">
-</div>
-
-<div>
-<label>止損 %</label>
-<input type="number" id="slPercent" value="1.5" step="0.1">
-</div>
-
-<div>
-<label>自定義 %</label>
-<input type="number" id="customPercent" value="5" step="0.1">
-</div>
-
-</div>
-
-<button onclick="calculate()">
-立即計算
-</button>
-
-<div class="total">
-<div>本金 USD：<b id="usdCapital">0</b></div>
-<div>本金 MYR：<b id="myrCapital">0</b></div>
-</div>
-
-<div class="result-grid">
-
-<div class="box tp">
-<div>🎯 止盈價</div>
-<div class="value" id="tpPrice">--</div>
-<div id="tpProfit">0</div>
-</div>
-
-<div class="box sl">
-<div>🛑 止損價</div>
-<div class="value" id="slPrice">--</div>
-<div id="slLoss">0</div>
-</div>
-
-</div>
-
-<div class="result-grid">
-
-<div class="box custom">
-<div>⚡ 自定義目標價</div>
-<div class="value" id="customPrice">--</div>
-<div id="customProfit">0</div>
-</div>
-
-</div>
-
-</div>
-
+    <!-- 底部：最近交易 -->
+    <div class="card">
+        <label>📝 最近 5 筆記錄 (保存在瀏覽器)</label>
+        <table class="history-table" id="historyTable">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>RSI</th>
+                    <th>美金淨盈虧</th>
+                    <th>馬幣淨盈虧</th>
+                </tr>
+            </thead>
+            <tbody id="historyBody">
+                <!-- 數據會在這裡生成 -->
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
+    // 初始化日期
+    document.getElementById('tradeDate').valueAsDate = new Date();
 
-function updateClock(){
+    function calculateNet() {
+        const buy = parseFloat(document.getElementById('buyPrice').value) || 0;
+        const sell = parseFloat(document.getElementById('sellPrice').value) || 0;
+        const shares = parseFloat(document.getElementById('shares').value) || 0;
+        const fx = parseFloat(document.getElementById('fxRate').value) || 4.7;
+        const bFee = parseFloat(document.getElementById('buyFee').value) || 0;
+        const sFee = parseFloat(document.getElementById('sellFee').value) || 0;
 
-    const now = new Date();
+        if (buy === 0 || sell === 0 || shares === 0) return { usd: 0, myr: 0 };
 
-    const h = String(now.getHours()).padStart(2,"0");
-    const m = String(now.getMinutes()).padStart(2,"0");
-    const s = String(now.getSeconds()).padStart(2,"0");
+        const grossUsd = (sell - buy) * shares;
+        const netUsd = grossUsd - bFee - sFee;
+        const netMyr = netUsd * fx;
 
-    document.getElementById("liveTime").innerText =
-        `${h}:${m}:${s}`;
+        document.getElementById('netUsd').innerText = (netUsd >= 0 ? "+" : "") + "$" + netUsd.toFixed(2) + " USD";
+        document.getElementById('netUsd').style.color = netUsd >= 0 ? "var(--green)" : "var(--red)";
+        document.getElementById('netMyr').innerText = Math.round(netMyr) + " MYR (淨利潤)";
 
-    const total =
-        now.getHours()*60 +
-        now.getMinutes();
-
-    const card =
-        document.getElementById("statusCard");
-
-    const text =
-        document.getElementById("statusText");
-
-    if(total >= 1290 && total < 1320){
-
-        card.style.borderLeftColor="#ff4d4f";
-
-        text.innerHTML=
-        "❌ 散戶混亂期<br>避免追高殺低";
-
-    }
-    else if(total >=1320 && total <1350){
-
-        card.style.borderLeftColor="#52c41a";
-
-        text.innerHTML=
-        "🟢 趨勢確立期<br>觀察突破方向";
-
-    }
-    else if(total >=1350 || total <240){
-
-        card.style.borderLeftColor="#faad14";
-
-        text.innerHTML=
-        "🌙 睡覺流時間<br>交給系統管理";
-
-    }
-    else{
-
-        card.style.borderLeftColor="#666";
-
-        text.innerHTML=
-        "💤 美股未開盤";
-
+        return { usd: netUsd.toFixed(2), myr: Math.round(netMyr) };
     }
 
-}
+    // 實時計算
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', calculateNet);
+    });
 
-function calculate(){
+    function saveRecord() {
+        const result = calculateNet();
+        if (parseFloat(result.usd) === 0) {
+            alert("請輸入完整的交易數據");
+            return;
+        }
 
-    const buyPrice =
-        parseFloat(
-            document.getElementById("buyPrice").value
-        );
+        const record = {
+            date: document.getElementById('tradeDate').value,
+            rsi: document.getElementById('rsiVal').value || "--",
+            usd: result.usd,
+            myr: result.myr
+        };
 
-    const shares =
-        parseFloat(
-            document.getElementById("shares").value
-        );
+        // 讀取現有記錄
+        let history = JSON.parse(localStorage.getItem('tradeHistory') || "[]");
+        history.unshift(record); // 加到最前面
+        localStorage.setItem('tradeHistory', JSON.stringify(history));
 
-    const fxRate =
-        parseFloat(
-            document.getElementById("fxRate").value
-        );
-
-    const tpPercent =
-        parseFloat(
-            document.getElementById("tpPercent").value
-        );
-
-    const slPercent =
-        parseFloat(
-            document.getElementById("slPercent").value
-        );
-
-    const customPercent =
-        parseFloat(
-            document.getElementById("customPercent").value
-        );
-
-    if(
-        isNaN(buyPrice) ||
-        isNaN(shares) ||
-        buyPrice<=0 ||
-        shares<=0
-    ){
-        return;
+        updateHistoryTable();
+        alert("記錄成功！數據已保存到本地。");
     }
 
-    const capitalUsd =
-        buyPrice * shares;
+    function updateHistoryTable() {
+        let history = JSON.parse(localStorage.getItem('tradeHistory') || "[]");
+        const body = document.getElementById('historyBody');
+        body.innerHTML = "";
 
-    const capitalMyr =
-        capitalUsd * fxRate;
-
-    document.getElementById("usdCapital")
-        .innerText =
-        "$"+capitalUsd.toFixed(2);
-
-    document.getElementById("myrCapital")
-        .innerText =
-        capitalMyr.toFixed(0);
-
-
-
-    /* 止盈 */
-
-    const tpPrice =
-        buyPrice *
-        (1 + tpPercent/100);
-
-    const tpProfitUsd =
-        (tpPrice-buyPrice)*
-        shares;
-
-    const tpProfitMyr =
-        tpProfitUsd *
-        fxRate;
-
-    document.getElementById("tpPrice")
-        .innerText =
-        "$"+tpPrice.toFixed(2);
-
-    document.getElementById("tpProfit")
-        .innerHTML =
-        `+${tpProfitUsd.toFixed(2)} USD (${tpProfitMyr.toFixed(0)} MYR)`;
-
-
-
-    /* 止損 */
-
-    const slPrice =
-        buyPrice *
-        (1 - slPercent/100);
-
-    const slLossUsd =
-        (buyPrice-slPrice)*
-        shares;
-
-    const slLossMyr =
-        slLossUsd *
-        fxRate;
-
-    document.getElementById("slPrice")
-        .innerText =
-        "$"+slPrice.toFixed(2);
-
-    document.getElementById("slLoss")
-        .innerHTML =
-        `-${slLossUsd.toFixed(2)} USD (${slLossMyr.toFixed(0)} MYR)`;
-
-
-
-    /* 自定義 */
-
-    const customPrice =
-        buyPrice *
-        (1 + customPercent/100);
-
-    const customUsd =
-        Math.abs(
-            (customPrice-buyPrice)
-            * shares
-        );
-
-    const customMyr =
-        customUsd *
-        fxRate;
-
-    document.getElementById("customPrice")
-        .innerText =
-        "$"+customPrice.toFixed(2);
-
-    if(customPercent >= 0){
-
-        document.getElementById("customProfit")
-        .innerHTML =
-        `+${customUsd.toFixed(2)} USD (${customMyr.toFixed(0)} MYR)`;
-
-    }else{
-
-        document.getElementById("customProfit")
-        .innerHTML =
-        `-${customUsd.toFixed(2)} USD (${customMyr.toFixed(0)} MYR)`;
-
+        // 只顯示最近 5 筆
+        history.slice(0, 5).forEach(item => {
+            const row = document.createElement('tr');
+            const usdClass = item.usd >= 0 ? "win" : "loss";
+            row.innerHTML = `
+                <td>${item.date}</td>
+                <td>${item.rsi}</td>
+                <td class="${usdClass}">${item.usd >= 0 ? '+' : ''}${item.usd}</td>
+                <td class="${usdClass}">${item.myr >= 0 ? '+' : ''}${item.myr}</td>
+            `;
+            body.appendChild(row);
+        });
     }
 
-}
-
-
-
-/* 自動更新 */
-
-setInterval(updateClock,1000);
-
-updateClock();
-
-document
-.querySelectorAll("input")
-.forEach(item=>{
-
-    item.addEventListener(
-        "input",
-        calculate
-    );
-
-});
-
+    // 頁面加載時更新表格
+    updateHistoryTable();
 </script>
 
 </body>

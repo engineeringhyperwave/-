@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大馬深夜提款機 - 自定義當冲決策面板</title>
+    <title>大馬深夜提款機 v3.0 - 核心面板</title>
     <style>
         :root {
-            --danger-color: #ff4d4f;
-            --success-color: #52c41a;
-            --warning-color: #faad14;
-            --primary-color: #1890ff;
-            --bg-color: #141414;
-            --card-bg: #1f1f1f;
-            --text-color: #ffffff;
+            --bg: #0b0f19;
+            --card: #1e293b;
+            --blue: #1890ff;
+            --green: #52c41a;
+            --red: #ff4d4f;
+            --yellow: #faad14;
+            --text: #ffffff;
+            --input-bg: #0f172a;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -33,302 +34,314 @@
 
         h1 {
             text-align: center;
-            color: var(--primary-color);
+            color: var(--blue);
+            font-size: 1.8rem;
             margin-bottom: 20px;
         }
 
-        /* 新增：導航按鈕樣式 */
-        .nav-btn-container {
+        /* 導航按鈕 */
+        .nav-container {
             display: flex;
-            gap: 10px;
-            justify-content: center;
+            gap: 12px;
             margin-bottom: 20px;
         }
-        
+
         .nav-btn {
-            background-color: transparent;
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
             flex: 1;
+            padding: 12px;
+            border-radius: 15px;
+            background: rgba(24, 144, 255, 0.1);
+            border: 1px solid var(--blue);
+            color: var(--blue);
             text-align: center;
             text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            cursor: pointer;
         }
 
         .nav-btn:hover {
-            background-color: var(--primary-color);
-            color: #fff;
-            box-shadow: 0 0 10px rgba(24, 144, 255, 0.5);
+            background: var(--blue);
+            color: white;
         }
 
-        /* 時間狀態燈號樣式 */
-        .status-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
+        /* 狀態卡片 */
+        .card {
+            background: var(--card);
+            border-radius: 20px;
             padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             margin-bottom: 20px;
-            transition: all 0.5s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .status-card {
+            text-align: center;
             border-left: 8px solid #666;
+            transition: border-color 0.5s;
         }
 
-        .status-danger { border-left-color: var(--danger-color); background: linear-gradient(135deg, #1f1f1f 70%, #2a1215 100%); }
-        .status-success { border-left-color: var(--success-color); background: linear-gradient(135deg, #1f1f1f 70%, #112614 100%); }
-        .status-warning { border-left-color: var(--warning-color); background: linear-gradient(135deg, #1f1f1f 70%, #2b2111 100%); }
-
-        .time-display {
-            font-size: 2rem;
+        .time {
+            font-size: 2.2rem;
+            font-family: 'Courier New', monospace;
             font-weight: bold;
-            margin-bottom: 10px;
-            font-family: monospace;
+            letter-spacing: 2px;
         }
 
-        .status-text {
-            font-size: 1.2rem;
+        .statusText {
+            margin-top: 8px;
             font-weight: bold;
+            font-size: 1.1rem;
         }
 
-        /* 計算器樣式 */
-        .calc-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            border: 1px solid #333;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .input-row {
+        /* 輸入區域 */
+        .input-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-bottom: 15px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #aaa;
-            font-size: 0.9rem;
+            margin-bottom: 6px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            font-weight: bold;
         }
 
-        input, select {
+        input {
             width: 100%;
             padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #434343;
-            background-color: #262626;
-            color: #fff;
-            font-size: 1.1rem;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            background: var(--input-bg);
+            color: white;
+            font-size: 1rem;
             box-sizing: border-box;
+            outline: none;
         }
 
         input:focus {
-            border-color: var(--primary-color);
-            outline: none;
+            border-color: var(--blue);
+        }
+
+        /* 結果顯示 */
+        .total-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 5px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .total-info b {
+            color: var(--yellow);
         }
 
         .result-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 12px;
             margin-top: 15px;
         }
 
-        .result-box {
+        .box {
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 15px;
             text-align: center;
+            transition: transform 0.2s;
         }
 
-        .tp-box { background-color: #112614; border: 1px solid var(--success-color); }
-        .sl-box { background-color: #2a1215; border: 1px solid var(--danger-color); }
-        .custom-box { background-color: #142436; border: 1px solid #177ddc; }
+        .tp { background: rgba(82, 196, 26, 0.1); border: 1px solid var(--green); }
+        .sl { background: rgba(255, 77, 79, 0.1); border: 1px solid var(--red); }
+        .custom { background: rgba(24, 144, 255, 0.1); border: 1px solid var(--blue); grid-column: span 2; }
 
-        .result-val {
-            font-size: 1.5rem;
-            font-weight: bold;
-            font-family: monospace;
-            margin-top: 5px;
-        }
+        .res-label { font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
+        .value { font-size: 1.6rem; font-family: monospace; font-weight: bold; margin: 5px 0; }
+        .profit { font-size: 0.85rem; font-weight: bold; }
 
-        .section-title {
-            color: #8c8c8c;
-            font-size: 0.85rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-top: 20px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-            display: block;
-        }
-
-        /* 絕對需要的救命設定卡片 */
+        /* 救命設定卡片 */
         .alert-card {
-            background-color: #142436;
-            border: 1px solid #177ddc;
-            border-radius: 8px;
+            background: rgba(24, 144, 255, 0.05);
+            border: 1px dashed var(--blue);
+            border-radius: 15px;
             padding: 15px;
-            margin-top: 20px;
-            font-size: 0.9rem;
-            line-height: 1.5;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #94a3b8;
         }
-        .alert-card ul { margin: 5px 0 0 20px; padding: 0; }
     </style>
 </head>
+
 <body>
 
 <div class="container">
-    <h1>大馬深夜提款機 💸</h1>
 
-    <!-- 跳轉按鈕區域 -->
-    <div class="nav-btn-container">
-        <button class="nav-btn" onclick="window.location.href='count.html'">📊 復盤頁 (count)</button>
-        <button class="nav-btn" onclick="window.location.href='3.html'">🚀 前往 V3 (3.html)</button>
+    <h1>💸 大馬深夜提款機 v3.0</h1>
+
+    <!-- 導航按鈕 -->
+    <div class="nav-container">
+        <a href="count.html" class="nav-btn">📊 歷史復盤頁</a>
+        <a href="3.html" class="nav-btn">🏠 做记录</a>
     </div>
 
-    <!-- 1. 時間狀態提示箱 -->
-    <div id="statusCard" class="status-card">
-        <div class="time-display" id="liveTime">00:00:00</div>
-        <div class="status-text" id="statusText">正在初始化市場時間...</div>
+    <!-- 1. 市場狀態 -->
+    <div class="card status-card" id="statusCard">
+        <div class="time" id="liveTime">00:00:00</div>
+        <div id="statusText" class="statusText">市場狀態檢測中...</div>
     </div>
 
-    <!-- 2. 當冲黃金計算器 -->
-    <div class="calc-card">
-        <div class="form-group">
-            <label>選擇交易標的 (連動自動爆倉清算提醒)</label>
-            <select id="ticker" onchange="calculate()">
-                <option value="TQQQ">TQQQ (三倍做多納指)</option>
-                <option value="SQQQ">SQQQ (三倍做空納指)</option>
-            </select>
-        </div>
-        
-        <!-- 輸入區域 -->
-        <div class="input-row">
+    <!-- 2. 輸入面板 -->
+    <div class="card">
+        <div class="input-grid">
             <div>
-                <label>💰 美金買入價格</label>
-                <input type="number" id="buyPrice" step="0.01" placeholder="例如: 50.25" oninput="calculate()">
+                <label>買入價格 (USD)</label>
+                <input type="number" id="buyPrice" placeholder="0.00" step="0.01">
             </div>
             <div>
-                <label>⚙️ 自定義止盈 % 數</label>
-                <input type="number" id="customPercent" step="0.1" value="5.0" placeholder="例如: 5" oninput="calculate()">
+                <label>股數 (Shares)</label>
+                <input type="number" id="shares" value="50">
+            </div>
+            <div>
+                <label>實時匯率 (MYR/USD)</label>
+                <input type="number" id="fxRate" value="4.07" step="0.01">
+            </div>
+            <div>
+                <label>止盈百分比 (%)</label>
+                <input type="number" id="tpPercent" value="3" step="0.1">
+            </div>
+            <div>
+                <label>止損百分比 (%)</label>
+                <input type="number" id="slPercent" value="1.5" step="0.1">
+            </div>
+            <div>
+                <label>自定義目標 (%)</label>
+                <input type="number" id="customPercent" value="5" step="0.1">
             </div>
         </div>
 
-        <!-- 自動計算結果：核心策略 (3% / 1.5%) -->
-        <div class="section-title">🛡️ 核心鋼鐵策略 (賺 3% / 賠 1.5%)</div>
+        <div class="total-info">
+            <div>所需本金 USD: <b id="usdCapital">$0.00</b></div>
+            <div>折合馬幣: <b id="myrCapital">0 MYR</b></div>
+        </div>
+
+        <!-- 計算結果 -->
         <div class="result-grid">
-            <div class="result-box tp-box">
-                <div style="color: var(--success-color); font-weight: bold;">🎯 核心止盈 (3%)</div>
-                <div class="result-val" id="tpPrice" style="color: #73d13d;">--</div>
-                <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">利潤約: +300 MYR</div>
+            <div class="box tp">
+                <div class="res-label" style="color: var(--green);">🎯 核心止盈</div>
+                <div class="value" id="tpPrice" style="color: #73d13d;">--</div>
+                <div class="profit" id="tpProfit" style="color: #73d13d;">0</div>
             </div>
-            <div class="result-box sl-box">
-                <div style="color: var(--danger-color); font-weight: bold;">🛑 鋼鐵止損 (1.5%)</div>
-                <div class="result-val" id="slPrice" style="color: #ff7875;">--</div>
-                <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">損失約: -150 MYR</div>
-            </div>
-        </div>
 
-        <!-- 自動計算結果：自定義大行情追蹤 -->
-        <div class="section-title">🚀 自定義大行情追蹤</div>
-        <div class="result-grid" style="grid-template-columns: 1fr;">
-            <div class="result-box custom-box">
-                <div style="color: #69c0ff; font-weight: bold;">⚡ 自定義止盈價 (<span id="customLabel">5</span>%)</div>
-                <div class="result-val" id="customPrice" style="color: #40a9ff;">--</div>
-                <div style="font-size: 0.8rem; color: #aaa; margin-top: 5px;">預估利潤: 約 +<span id="customMyr">500</span> MYR</div>
+            <div class="box sl">
+                <div class="res-label" style="color: var(--red);">🛑 鋼鐵止損</div>
+                <div class="value" id="slPrice" style="color: #ff7875;">--</div>
+                <div class="profit" id="slLoss" style="color: #ff7875;">0</div>
+            </div>
+
+            <div class="box custom">
+                <div class="res-label" style="color: var(--blue);">🚀 自定義目標追蹤</div>
+                <div class="value" id="customPrice" style="color: var(--blue);">--</div>
+                <div class="profit" id="customProfit" style="color: var(--blue);">0</div>
             </div>
         </div>
     </div>
 
-    <!-- 3. 系統核心提示 -->
+    <!-- 3. OCO 設定提醒 -->
     <div class="alert-card">
-        <div style="font-weight: bold; color: #177ddc; font-size: 1rem; margin-bottom: 5px;">⚠️ 10:30 去睡覺前，Moomoo 必備鋼鐵設定：</div>
-        <ul>
-            <li><strong>訂單類型：</strong>必須選 <strong>OCO (組合訂單)</strong>。</li>
-            <li><strong>止損訂單類型：</strong>務必選 <strong>止損市價單 (Stop Market)</strong>，防止半夜暴跌跳空卡單！</li>
-            <li><strong>訂單有效期：</strong>選擇 <strong>當日有效 (Day)</strong> ＋ 勾選 <strong>允許盤後交易</strong>。</li>
-            <li style="color: #ff7875; font-weight: bold;">【保險鬧鐘】建議手機定 03:45 AM 鬧鐘，若未成交，手動全數清倉！</li>
-        </ul>
+        <b>⚠️ 睡前 Moomoo OCO 必備設定：</b><br>
+        • 訂單類型：必須選 <b>OCO (組合單)</b><br>
+        • 止損觸發：務必選 <b>止損市價 (Stop Market)</b><br>
+        • 有效期：當日有效 (Day) + 勾選 <b>允許盤後</b>
     </div>
+
 </div>
 
 <script>
-    function updateMarketStatus() {
-        const now = new Date();
-        const hours = now.getHours();
-        const minutes = now.getMinutes();
-        const seconds = now.getSeconds();
-        
-        const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        const liveTimeEl = document.getElementById('liveTime');
-        if(liveTimeEl) liveTimeEl.innerText = timeStr;
+function updateClock(){
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,"0");
+    const m = String(now.getMinutes()).padStart(2,"0");
+    const s = String(now.getSeconds()).padStart(2,"0");
 
-        const card = document.getElementById('statusCard');
-        const text = document.getElementById('statusText');
-        const totalMinutes = hours * 60 + minutes;
+    document.getElementById("liveTime").innerText = `${h}:${m}:${s}`;
 
-        if (totalMinutes >= 1290 && totalMinutes < 1320) { 
-            card.className = "status-card status-danger";
-            text.innerHTML = "❌ 散戶與混亂期（不穩）<br><span style='font-size:0.9rem; font-weight:normal; color:#ffccc7;'>大資金正在洗盤，千萬不要手癢進場！</span>";
-        } else if (totalMinutes >= 1320 && totalMinutes < 1350) { 
-            card.className = "status-card status-success";
-            text.innerHTML = "🟢 趨勢確立期（最穩妥）<br><span style='font-size:0.9rem; font-weight:normal; color:#d9f7be;'>機構大單已確認方向，準備觀察突破進場！</span>";
-        } else if (totalMinutes >= 1350 || totalMinutes < 240) { 
-            card.className = "status-card status-warning";
-            text.innerHTML = "🌙 市場運行期（睡覺流時間）<br><span style='font-size:0.9rem; font-weight:normal; color:#ffe7ba;'>交給 Moomoo 系統自動跑，請去安心睡覺。</span>";
-        } else {
-            card.className = "status-card";
-            text.innerHTML = "💤 美股未開盤<br><span style='font-size:0.9rem; font-weight:normal; color:#aaa;'>養精蓄銳，等今晚 21:30 再戰。</span>";
-        }
+    const total = now.getHours()*60 + now.getMinutes();
+    const card = document.getElementById("statusCard");
+    const text = document.getElementById("statusText");
+
+    if(total >= 1290 && total < 1320){
+        card.style.borderColor = "var(--red)";
+        text.innerHTML = "❌ 散戶混亂期 (不穩) - 建議觀望";
+        text.style.color = "var(--red)";
+    }
+    else if(total >= 1320 && total < 1350){
+        card.style.borderColor = "var(--green)";
+        text.innerHTML = "🟢 趨勢確立期 (最穩) - 準備進場";
+        text.style.color = "var(--green)";
+    }
+    else if(total >= 1350 || total < 240){
+        card.style.borderColor = "var(--yellow)";
+        text.innerHTML = "🌙 睡覺流時間 - 交給系統自動跑";
+        text.style.color = "var(--yellow)";
+    }
+    else{
+        card.style.borderColor = "#666";
+        text.innerHTML = "💤 美股未開盤 - 養精蓄銳";
+        text.style.color = "#94a3b8";
+    }
+}
+
+function calculate(){
+    const buyPrice = parseFloat(document.getElementById("buyPrice").value);
+    const shares = parseFloat(document.getElementById("shares").value);
+    const fxRate = parseFloat(document.getElementById("fxRate").value);
+    const tpPercent = parseFloat(document.getElementById("tpPercent").value);
+    const slPercent = parseFloat(document.getElementById("slPercent").value);
+    const customPercent = parseFloat(document.getElementById("customPercent").value);
+
+    if(isNaN(buyPrice) || isNaN(shares) || buyPrice <= 0 || shares <= 0){
+        return;
     }
 
-    function calculate() {
-        const buyPriceInput = document.getElementById('buyPrice');
-        const customPercentInput = document.getElementById('customPercent');
-        
-        if (!buyPriceInput || !customPercentInput) return;
+    const capitalUsd = buyPrice * shares;
+    const capitalMyr = capitalUsd * fxRate;
 
-        const buyPrice = parseFloat(buyPriceInput.value);
-        const customPct = parseFloat(customPercentInput.value);
+    document.getElementById("usdCapital").innerText = "$" + capitalUsd.toFixed(2);
+    document.getElementById("myrCapital").innerText = Math.round(capitalMyr) + " MYR";
 
-        if (isNaN(buyPrice) || buyPrice <= 0) {
-            document.getElementById('tpPrice').innerText = "--";
-            document.getElementById('slPrice').innerText = "--";
-            document.getElementById('customPrice').innerText = "--";
-            return;
-        }
+    // 止盈計算
+    const tpPrice = buyPrice * (1 + tpPercent/100);
+    const tpProfitUsd = (tpPrice - buyPrice) * shares;
+    const tpProfitMyr = tpProfitUsd * fxRate;
+    document.getElementById("tpPrice").innerText = "$" + tpPrice.toFixed(2);
+    document.getElementById("tpProfit").innerHTML = `+${tpProfitUsd.toFixed(2)} USD (+${Math.round(tpProfitMyr)} MYR)`;
 
-        // 1. 核心策略計算 (+3% / -1.5%)
-        const tp = buyPrice * 1.03;
-        const sl = buyPrice * 0.985;
-        document.getElementById('tpPrice').innerText = `$${tp.toFixed(2)}`;
-        document.getElementById('slPrice').innerText = `$${sl.toFixed(2)}`;
+    // 止損計算
+    const slPrice = buyPrice * (1 - slPercent/100);
+    const slLossUsd = (buyPrice - slPrice) * shares;
+    const slLossMyr = slLossUsd * fxRate;
+    document.getElementById("slPrice").innerText = "$" + slPrice.toFixed(2);
+    document.getElementById("slLoss").innerHTML = `-${slLossUsd.toFixed(2)} USD (-${Math.round(slLossMyr)} MYR)`;
 
-        // 2. 自定義百分比計算
-        const pct = isNaN(customPct) ? 0 : customPct;
-        document.getElementById('customLabel').innerText = pct;
-        
-        const customTpPrice = buyPrice * (1 + (pct / 100));
-        document.getElementById('customPrice').innerText = `$${customTpPrice.toFixed(2)}`;
+    // 自定義計算
+    const customPrice = buyPrice * (1 + customPercent/100);
+    const customDiffUsd = (customPrice - buyPrice) * shares;
+    const customDiffMyr = customDiffUsd * fxRate;
+    
+    document.getElementById("customPrice").innerText = "$" + customPrice.toFixed(2);
+    const sign = customPercent >= 0 ? "+" : "";
+    document.getElementById("customProfit").innerHTML = `${sign}${customDiffUsd.toFixed(2)} USD (${sign}${Math.round(customDiffMyr)} MYR)`;
+}
 
-        // 3. 預估馬幣利潤
-        const estMyr = (pct / 3) * 300;
-        document.getElementById('customMyr').innerText = isNaN(estMyr) ? "0" : Math.round(estMyr);
-    }
+// 監聽所有輸入框，達成實時更新
+document.querySelectorAll("input").forEach(input => {
+    input.addEventListener("input", calculate);
+});
 
-    // 初始化
-    setInterval(updateMarketStatus, 1000);
-    updateMarketStatus();
+setInterval(updateClock, 1000);
+updateClock();
+calculate(); // 初始化計算一次
 </script>
 
 </body>
