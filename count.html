@@ -76,7 +76,7 @@
 
     <div class="nav-bar">
         <a href="index.html" class="nav-btn">🏠 返回首頁</a>
-        <a href="3.html" class="nav-btn">🧮 回到結算中心</a>
+        <a href="3.html" class="nav-btn">🧮 记录</a>
     </div>
 
     <button class="reload-btn" onclick="loadData()">🔄 從 Google Sheet 重新載入</button>
@@ -214,11 +214,8 @@
                 <label style="color: var(--blue);">📊 進場 RSI 區間 勝率與盈虧</label>
                 <canvas id="rsiChart"></canvas>
             </div>
-            <div class="card chart-box">
-                <label style="color: var(--blue);">🧧 手續費佔比</label>
-                <canvas id="feeChart"></canvas>
-            </div>
         </div>
+
 
         <div class="card">
             <label style="color: var(--blue);">📝 完整交易記錄 (${totalTrades} 筆)</label>
@@ -226,21 +223,21 @@
             <table class="history-table">
                 <thead>
                     <tr>
-                        <th>日期</th><th>股票</th><th>買入時間</th><th>賣出時間</th>
+                        <th>日期</th><th>股票</th>
                         <th>進場RSI</th><th>出場RSI</th><th>買入價</th><th>賣出價</th>
-                        <th>股數</th><th>匯率</th><th>手續費USD</th><th>美金淨盈虧</th><th>馬幣淨盈虧</th>
+                        <th>股數</th><th>匯率</th><th>手續費USD</th><th>手續費MYR</th><th>美金淨盈虧</th><th>馬幣淨盈虧</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${data.map(r => {
                         const usd = parseFloat(r.usd) || 0;
                         const cls = usd >= 0 ? 'win' : 'loss';
+                        const fx = parseFloat(r.fxRate) || 4.07;
                         const feeUsd = (parseFloat(r.buyFee) || 0) + (parseFloat(r.sellFee) || 0);
+                        const feeMyr = feeUsd * fx;
                         return `<tr>
                             <td>${r.date || ''}</td>
                             <td>${r.symbol || '--'}</td>
-                            <td>${r.entryTime || '--'}</td>
-                            <td>${r.exitTime || '--'}</td>
                             <td>${r.rsiEntry || '--'}</td>
                             <td>${r.rsiExit || '--'}</td>
                             <td>${r.buyPrice || ''}</td>
@@ -248,6 +245,7 @@
                             <td>${r.shares || ''}</td>
                             <td>${r.fxRate || ''}</td>
                             <td>$${feeUsd.toFixed(2)}</td>
+                            <td>${feeMyr.toFixed(0)}</td>
                             <td class="${cls}">${usd >= 0 ? '+' : ''}${usd.toFixed(2)}</td>
                             <td class="${cls}">${r.myr >= 0 ? '+' : ''}${r.myr}</td>
                         </tr>`;
@@ -264,7 +262,6 @@
         drawEquityChart(data);
         drawSymbolChart(symbolStats);
         drawRsiChart(rsiBuckets);
-        drawFeeChart(totalUsd, totalFeeUsd);
     }
 
     function rsiBucket(rsi) {
@@ -383,25 +380,6 @@
                     y: { position: 'left', ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
                     y1: { position: 'right', min: 0, max: 100, ticks: { color: '#fbbf24' }, grid: { display: false } }
                 }
-            }
-        });
-    }
-
-    function drawFeeChart(totalUsd, totalFeeUsd) {
-        const grossEstimate = totalUsd + totalFeeUsd; // 反推毛利
-        destroyChart('feeChart');
-        charts.feeChart = new Chart(document.getElementById('feeChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['淨盈虧 (扣除手續費後)', '手續費總額'],
-                datasets: [{
-                    data: [Math.max(totalUsd, 0).toFixed(2), totalFeeUsd.toFixed(2)],
-                    backgroundColor: ['#4ade80', '#fbbf24']
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { labels: { color: '#f1f5f9' } } }
             }
         });
     }
