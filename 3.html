@@ -56,6 +56,7 @@
         input {
             background: #0f172a; border: 1px solid #334155; color: white;
             padding: 12px; border-radius: 12px; font-size: 1rem; outline: none;
+            text-transform: uppercase;
         }
         input:focus { border-color: var(--blue); }
 
@@ -71,18 +72,35 @@
             text-align: center; padding: 15px; border-radius: 15px;
             background: rgba(0,0,0,0.2); border: 1px solid #334155; margin-top: 10px;
         }
+
+        /* 手續費小計 */
+        .fee-box {
+            display: flex; justify-content: space-around; margin-top: 10px;
+            font-size: 0.8rem; color: #94a3b8;
+        }
+        .fee-box b { color: var(--yellow); }
+
         .record-btn {
             width: 100%; background: var(--green); color: #064e3b; border: none;
             padding: 15px; border-radius: 15px; font-weight: bold; font-size: 1rem;
             margin-top: 15px; cursor: pointer;
         }
+        .record-btn:disabled { opacity: 0.6; cursor: wait; }
 
         /* 歷史記錄表格 */
         .history-table { width: 100%; font-size: 0.8rem; margin-top: 10px; border-collapse: collapse; }
-        .history-table th { background: #0f172a; padding: 10px; text-align: left; }
-        .history-table td { padding: 10px; border-bottom: 1px solid #334155; }
+        .history-table th { background: #0f172a; padding: 10px; text-align: left; white-space: nowrap; }
+        .history-table td { padding: 10px; border-bottom: 1px solid #334155; white-space: nowrap; }
         .win { color: var(--green); }
         .loss { color: var(--red); }
+
+        .table-scroll { overflow-x: auto; }
+
+        .sync-status {
+            font-size: 0.75rem; text-align: center; margin-top: 8px; color: #64748b;
+        }
+        .sync-status.ok { color: var(--green); }
+        .sync-status.err { color: var(--red); }
     </style>
 </head>
 <body>
@@ -92,7 +110,7 @@
 
     <div class="nav-bar">
         <a href="index.html" class="nav-btn">🏠 返回首頁</a>
-        <a href="count.html" class="nav-btn">📊 交易歷史與統計</a>
+        <a href="count.html" class="nav-btn">📊 结算分析</a>
     </div>
 
     <div class="main-layout">
@@ -105,8 +123,24 @@
                         <input type="date" id="tradeDate">
                     </div>
                     <div class="input-group">
-                        <label>💱 結算匯率</label>
-                        <input type="number" id="fxRate" value="4.07" step="0.01">
+                        <label>🏷️ 股票編號</label>
+                        <input type="text" id="symbol" placeholder="例如 TQQQ / SQQQ / NVTS">
+                    </div>
+                    <div class="input-group">
+                        <label>⏰ 買入時間</label>
+                        <input type="time" id="entryTime">
+                    </div>
+                    <div class="input-group">
+                        <label>⏰ 賣出時間</label>
+                        <input type="time" id="exitTime">
+                    </div>
+                    <div class="input-group">
+                        <label>📈 進場 RSI</label>
+                        <input type="number" id="rsiEntry" placeholder="例如 55">
+                    </div>
+                    <div class="input-group">
+                        <label>📉 出場 RSI</label>
+                        <input type="number" id="rsiExit" placeholder="例如 70">
                     </div>
                     <div class="input-group">
                         <label>💰 買入美金價</label>
@@ -121,12 +155,12 @@
                         <input type="number" id="shares" value="50">
                     </div>
                     <div class="input-group">
-                        <label>📈 進場 RSI</label>
-                        <input type="number" id="rsiVal" placeholder="例如 55">
+                        <label>💱 結算匯率</label>
+                        <input type="number" id="fxRate" value="4.07" step="0.01">
                     </div>
                     <div class="input-group">
                         <label>🧧 買入手續費 (USD)</label>
-                        <input type="number" id="buyFee" value="2.90">
+                        <input type="number" id="buyFee" value="2.29">
                     </div>
                     <div class="input-group">
                         <label>🧧 賣出手續費 (USD)</label>
@@ -137,9 +171,16 @@
                 <div class="summary-box">
                     <div id="netUsd" style="font-size: 1.5rem; font-weight: bold;">$0.00 USD</div>
                     <div id="netMyr" style="color: var(--yellow); font-size: 1.1rem;">0 MYR (淨利潤)</div>
+                    <div class="fee-box">
+                        <div>本筆手續費: <b id="thisFeeUsd">$0.00</b> USD / <b id="thisFeeMyr">0</b> MYR</div>
+                    </div>
+                    <div class="fee-box">
+                        <div>累計手續費: <b id="totalFeeUsd">$0.00</b> USD / <b id="totalFeeMyr">0</b> MYR</div>
+                    </div>
                 </div>
 
-                <button class="record-btn" onclick="saveRecord()">✅ 記錄這筆交易到 LocalStorage</button>
+                <button class="record-btn" id="saveBtn" onclick="saveRecord()">✅ 記錄這筆交易</button>
+                <div class="sync-status" id="syncStatus">尚未同步到 Google Sheet</div>
             </div>
         </div>
 
@@ -172,12 +213,14 @@
 
     <!-- 底部：最近交易 -->
     <div class="card">
-        <label>📝 最近 5 筆記錄 (保存在瀏覽器)</label>
+        <label>📝 最近 5 筆記錄 (本機快取)</label>
+        <div class="table-scroll">
         <table class="history-table" id="historyTable">
             <thead>
                 <tr>
                     <th>日期</th>
-                    <th>RSI</th>
+                    <th>股票</th>
+                    <th>RSI 進/出</th>
                     <th>美金淨盈虧</th>
                     <th>馬幣淨盈虧</th>
                 </tr>
@@ -186,10 +229,16 @@
                 <!-- 數據會在這裡生成 -->
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 
 <script>
+    // ============================================
+    // ⚠️ 請把下面這行換成你部署 Apps Script 後得到的網址
+    // ============================================
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwCanB3qbBHcS9OF7XQ8EF_XdH3ztI3tQTzcPObM6Ewjwxda0YiJ_WHTGreePtB2tE/exec";
+
     // 初始化日期
     document.getElementById('tradeDate').valueAsDate = new Date();
 
@@ -201,7 +250,18 @@
         const bFee = parseFloat(document.getElementById('buyFee').value) || 0;
         const sFee = parseFloat(document.getElementById('sellFee').value) || 0;
 
-        if (buy === 0 || sell === 0 || shares === 0) return { usd: 0, myr: 0 };
+        const thisFeeUsd = bFee + sFee;
+        const thisFeeMyr = thisFeeUsd * fx;
+
+        document.getElementById('thisFeeUsd').innerText = "$" + thisFeeUsd.toFixed(2);
+        document.getElementById('thisFeeMyr').innerText = Math.round(thisFeeMyr);
+
+        if (buy === 0 || sell === 0 || shares === 0) {
+            document.getElementById('netUsd').innerText = "$0.00 USD";
+            document.getElementById('netUsd').style.color = "var(--text)";
+            document.getElementById('netMyr').innerText = "0 MYR (淨利潤)";
+            return { usd: 0, myr: 0, feeUsd: thisFeeUsd, feeMyr: thisFeeMyr };
+        }
 
         const grossUsd = (sell - buy) * shares;
         const netUsd = grossUsd - bFee - sFee;
@@ -211,7 +271,7 @@
         document.getElementById('netUsd').style.color = netUsd >= 0 ? "var(--green)" : "var(--red)";
         document.getElementById('netMyr').innerText = Math.round(netMyr) + " MYR (淨利潤)";
 
-        return { usd: netUsd.toFixed(2), myr: Math.round(netMyr) };
+        return { usd: netUsd.toFixed(2), myr: Math.round(netMyr), feeUsd: thisFeeUsd, feeMyr: thisFeeMyr };
     }
 
     // 實時計算
@@ -219,41 +279,101 @@
         input.addEventListener('input', calculateNet);
     });
 
-    function saveRecord() {
+    function getHistory() {
+        return JSON.parse(localStorage.getItem('tradeHistory') || "[]");
+    }
+
+    function setHistory(h) {
+        localStorage.setItem('tradeHistory', JSON.stringify(h));
+    }
+
+    function updateTotalFees() {
+        const history = getHistory();
+        let totalFeeUsd = 0;
+        history.forEach(item => {
+            totalFeeUsd += (parseFloat(item.buyFee) || 0) + (parseFloat(item.sellFee) || 0);
+        });
+        // 用最近一筆匯率估算累計馬幣手續費（粗估）
+        const lastFx = history.length > 0 ? (parseFloat(history[0].fxRate) || 4.07) : 4.07;
+        document.getElementById('totalFeeUsd').innerText = "$" + totalFeeUsd.toFixed(2);
+        document.getElementById('totalFeeMyr').innerText = Math.round(totalFeeUsd * lastFx);
+    }
+
+    async function saveRecord() {
         const result = calculateNet();
         if (parseFloat(result.usd) === 0) {
-            alert("請輸入完整的交易數據");
+            alert("請輸入完整的交易數據（買入價/賣出價/股數）");
             return;
         }
 
         const record = {
             date: document.getElementById('tradeDate').value,
-            rsi: document.getElementById('rsiVal').value || "--",
+            symbol: document.getElementById('symbol').value.toUpperCase() || "--",
+            entryTime: document.getElementById('entryTime').value || "",
+            exitTime: document.getElementById('exitTime').value || "",
+            rsiEntry: document.getElementById('rsiEntry').value || "--",
+            rsiExit: document.getElementById('rsiExit').value || "--",
+            buyPrice: document.getElementById('buyPrice').value,
+            sellPrice: document.getElementById('sellPrice').value,
+            shares: document.getElementById('shares').value,
+            fxRate: document.getElementById('fxRate').value,
+            buyFee: document.getElementById('buyFee').value,
+            sellFee: document.getElementById('sellFee').value,
             usd: result.usd,
             myr: result.myr
         };
 
-        // 讀取現有記錄
-        let history = JSON.parse(localStorage.getItem('tradeHistory') || "[]");
-        history.unshift(record); // 加到最前面
-        localStorage.setItem('tradeHistory', JSON.stringify(history));
-
+        // 先存本機
+        let history = getHistory();
+        history.unshift(record);
+        setHistory(history);
         updateHistoryTable();
-        alert("記錄成功！數據已保存到本地。");
+        updateTotalFees();
+
+        // 同步到 Google Sheet
+        const btn = document.getElementById('saveBtn');
+        const status = document.getElementById('syncStatus');
+
+        if (!GAS_URL || GAS_URL.indexOf("PASTE_YOUR") !== -1) {
+            status.innerText = "⚠️ 尚未設定 Google Sheet 網址（只保存在本機）";
+            status.className = "sync-status err";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "⏳ 正在同步到 Google Sheet...";
+        status.innerText = "正在同步...";
+        status.className = "sync-status";
+
+        try {
+            await fetch(GAS_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "add", record: record })
+            });
+            status.innerText = "✅ 已同步到 Google Sheet";
+            status.className = "sync-status ok";
+        } catch (err) {
+            status.innerText = "❌ 同步失敗，但已保存在本機: " + err.message;
+            status.className = "sync-status err";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "✅ 記錄這筆交易";
+        }
     }
 
     function updateHistoryTable() {
-        let history = JSON.parse(localStorage.getItem('tradeHistory') || "[]");
+        let history = getHistory();
         const body = document.getElementById('historyBody');
         body.innerHTML = "";
 
-        // 只顯示最近 5 筆
         history.slice(0, 5).forEach(item => {
             const row = document.createElement('tr');
             const usdClass = item.usd >= 0 ? "win" : "loss";
             row.innerHTML = `
                 <td>${item.date}</td>
-                <td>${item.rsi}</td>
+                <td>${item.symbol || "--"}</td>
+                <td>${item.rsiEntry || "--"} / ${item.rsiExit || "--"}</td>
                 <td class="${usdClass}">${item.usd >= 0 ? '+' : ''}${item.usd}</td>
                 <td class="${usdClass}">${item.myr >= 0 ? '+' : ''}${item.myr}</td>
             `;
@@ -261,8 +381,9 @@
         });
     }
 
-    // 頁面加載時更新表格
+    // 頁面加載時更新
     updateHistoryTable();
+    updateTotalFees();
 </script>
 
 </body>

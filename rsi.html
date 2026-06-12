@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TQQQ/SQQQ 双模量化决策雷达 - 手动版</title>
+    <style>
+        body {
+            font-family: 'PingFang SC', -apple-system, sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+            padding: 15px; /* 手机端稍微缩小边距 */
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* 响应式头部容器 */
+        .header-container {
+            display: flex;
+            flex-direction: column; /* 手机端默认纵向排列，防止重叠 */
+            gap: 12px;
+            margin-bottom: 25px;
+            align-items: stretch;
+        }
+        
+        /* 按钮组容器 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .back-btn {
+            flex: 1; /* 均分宽度 */
+            text-align: center;
+            background-color: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            padding: 10px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.2s;
+            white-space: nowrap; /* 防止文字换行 */
+        }
+        .back-btn:hover {
+            background-color: #334155;
+            color: #fff;
+            border-color: #475569;
+        }
+        h1 {
+            text-align: center;
+            color: #38bdf8;
+            margin: 5px 0 0 0;
+            font-size: 1.6rem;
+            letter-spacing: 1px;
+        }
+        .card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+        h2 {
+            color: #fbbf24;
+            margin-top: 0;
+            font-size: 1.1rem;
+            border-left: 4px solid #fbbf24;
+            padding-left: 8px;
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            background-color: #0f172a;
+            border: 1px solid #475569;
+            color: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+        .signal-box {
+            background-color: #0f172a;
+            border-radius: 8px;
+            padding: 25px 15px;
+            text-align: center;
+            border: 1px solid #1e293b;
+            transition: all 0.3s ease;
+        }
+        .direction-tag {
+            font-size: 1.6rem; /* 调整手机端字号，防止溢出 */
+            font-weight: bold;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+        .win-rate-tag {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .money-tag {
+            font-size: 1.2rem;
+            background-color: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            color: #34d399;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+            max-width: 100%;
+            box-sizing: border-box;
+            word-break: break-all;
+        }
+        .text-blue { color: #38bdf8; }
+        .text-green { color: #34d399; }
+        .text-red { color: #f43f5e; }
+        .text-gray { color: #64748b; }
+        
+        /* 电脑端大屏优化 */
+        @media (min-width: 600px) {
+            body { padding: 20px; }
+            .header-container {
+                flex-direction: row;
+                align-items: center;
+                position: relative;
+            }
+            .btn-group {
+                position: absolute;
+                left: 0;
+                right: 0;
+                display: flex;
+                justify-content: space-between; /* 核心：让两个按钮分居左右两侧 */
+                pointer-events: none; /* 防止层级遮挡标题点击 */
+            }
+            .back-btn { 
+                flex: none; 
+                width: auto; 
+                padding: 8px 16px; 
+                pointer-events: auto; /* 恢复按钮可点击 */
+            }
+            h1 { flex-grow: 1; font-size: 1.8rem; margin: 0; text-align: center; }
+            .card { padding: 25px; }
+            h2 { font-size: 1.2rem; }
+            .direction-tag { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="btn-group">
+            <a href="index.html" class="back-btn">⬅ 返回首页</a>
+            <a href="3.html" class="back-btn">📚记录/笔记 ➡</a>
+        </div>
+        <h1>RSI 决策雷达</h1>
+    </div>
+
+    <div class="card">
+        <h2>1. 填入量化核心参数</h2>
+        
+        <label>短线当前可用总资金 (马币 MYR)</label>
+        <input type="number" id="txt_capital" value="4237" placeholder="请输入可用资金" oninput="runDecisionEngine()">
+        
+        <label style="color: #fbbf24;">请输入来自 Moomoo 的 5分钟 RSI1 数字：</label>
+        <input type="number" id="txt_manual_rsi" value="50" min="0" max="100" step="0.01" placeholder="例如：58.5" oninput="runDecisionEngine()">
+    </div>
+
+    <div class="card" style="border: 2px solid #38bdf8; background: radial-gradient(circle at top, #1e293b 0%, #111827 100%);">
+        <h2>2. 华尔街量化实时决策结果</h2>
+        
+        <div class="signal-box" id="result_box">
+            <div id="main_content">
+                <div class="direction-tag" id="lbl_action">--</div>
+                <div style="font-size: 1rem; color: #94a3b8; margin: 10px 0;">
+                    当前正在使用的 5M-RSI：<span id="lbl_rsi_val" style="font-weight: bold; color: #fbbf24;">--</span>
+                </div>
+                <div class="win-rate-tag" id="lbl_rate">--</div>
+                <div id="lbl_money_container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 核心中央决策引擎
+        function runDecisionEngine() {
+            // 直接读取手动输入的 RSI 值
+            const rsiInput = document.getElementById('txt_manual_rsi').value;
+            
+            // 拦截空输入或者不合法数字
+            if (rsiInput === "" || rsiInput === null) {
+                resetDisplay();
+                return;
+            }
+            
+            const rsi = parseFloat(rsiInput);
+            if (isNaN(rsi) || rsi < 0 || rsi > 100) {
+                resetDisplay();
+                return;
+            }
+
+            const capital = parseFloat(document.getElementById('txt_capital').value) || 0;
+            const actionLbl = document.getElementById('lbl_action');
+            const rsiValLbl = document.getElementById('lbl_rsi_val');
+            const rateLbl = document.getElementById('lbl_rate');
+            const moneyContainer = document.getElementById('lbl_money_container');
+            const resultBox = document.getElementById('result_box');
+
+            rsiValLbl.innerText = rsi.toFixed(2);
+
+            let direction = "";
+            let winRate = 0.50;
+            let actionClass = "";
+
+            // 铁血动量判定信号
+            if (rsi >= 55) {
+                direction = "📈 建议买入：TQQQ (看多纳指)";
+                actionClass = "direction-tag text-blue";
+                resultBox.style.borderColor = "#38bdf8";
+                winRate = 0.53 + ((rsi - 55) / 25) * 0.12;
+                if (winRate > 0.68) winRate = 0.68;
+            } else if (rsi <= 45) {
+                direction = "📉 建议买入：SQQQ (看空纳指)";
+                actionClass = "direction-tag text-red";
+                resultBox.style.borderColor = "#f43f5e";
+                winRate = 0.53 + ((45 - rsi) / 25) * 0.12;
+                if (winRate > 0.68) winRate = 0.68;
+            } else {
+                direction = "⚖️ 胜率无优势：今晚强制空仓观望";
+                actionClass = "direction-tag text-gray";
+                resultBox.style.borderColor = "#334155";
+                winRate = 0.50;
+            }
+
+            actionLbl.innerText = direction;
+            actionLbl.className = actionClass;
+            rateLbl.innerText = "预估今晚胜率：" + (winRate * 100).toFixed(1) + "%";
+
+            // 凯利公式算账
+            if (winRate > 0.50 && capital > 0) {
+                const p = winRate;
+                const q = 1 - p;
+                const b = 3 / 1.5; // 3%止盈 / 1.5%止损 = 赔率 2
+                let f = (p * b - q) / b;
+                if (f < 0) f = 0;
+                
+                const investMoney = capital * f;
+                moneyContainer.innerHTML = `
+                    <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px;">动态凯利推荐下注比例：${(f * 100).toFixed(2)}%</div>
+                    <div class="money-tag">今日推荐下注金额：${investMoney.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} 马币</div>
+                `;
+            } else {
+                moneyContainer.innerHTML = `
+                    <div style="font-size: 0.95rem; color: #f43f5e; font-weight: bold; margin-top: 15px; padding: 0 10px;">
+                        🛑 提示：当前属于无优势震荡带，下注亏损风险极高，请空仓观望！
+                    </div>
+                `;
+            }
+        }
+
+        // 重置未输入时的界面状态
+        function resetDisplay() {
+            document.getElementById('lbl_action').innerText = "--";
+            document.getElementById('lbl_action').className = "direction-tag text-gray";
+            document.getElementById('lbl_rsi_val').innerText = "--";
+            document.getElementById('lbl_rate').innerText = "--";
+            document.getElementById('lbl_money_container').innerHTML = "";
+            document.getElementById('result_box').style.borderColor = "#1e293b";
+        }
+
+        // 页面加载时自动运行一次初始值的计算
+        window.onload = function() {
+            runDecisionEngine();
+        };
+    </script>
+</body>
+</html>
