@@ -3,27 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TQQQ/SQQQ 双模量化决策雷达 - 手动版</title>
+    <title>TQQQ/SQQQ 双模量化决策雷达 - 终极版</title>
     <style>
         body {
             font-family: 'PingFang SC', -apple-system, sans-serif;
             background-color: #0b0f19;
             color: #f1f5f9;
-            padding: 15px; /* 手机端稍微缩小边距 */
+            padding: 15px;
             max-width: 800px;
             margin: 0 auto;
         }
         
-        /* 响应式头部容器 */
         .header-container {
             display: flex;
-            flex-direction: column; /* 手机端默认纵向排列，防止重叠 */
+            flex-direction: column;
             gap: 12px;
             margin-bottom: 25px;
             align-items: stretch;
         }
         
-        /* 按钮组容器 */
         .btn-group {
             display: flex;
             gap: 10px;
@@ -31,7 +29,7 @@
         }
 
         .back-btn {
-            flex: 1; /* 均分宽度 */
+            flex: 1;
             text-align: center;
             background-color: #1e293b;
             color: #94a3b8;
@@ -42,7 +40,7 @@
             font-size: 0.9rem;
             font-weight: bold;
             transition: all 0.2s;
-            white-space: nowrap; /* 防止文字换行 */
+            white-space: nowrap;
         }
         .back-btn:hover {
             background-color: #334155;
@@ -76,7 +74,7 @@
             display: block;
             font-size: 0.9rem;
             color: #94a3b8;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: bold;
         }
         input {
@@ -103,7 +101,7 @@
             transition: all 0.3s ease;
         }
         .direction-tag {
-            font-size: 1.6rem; /* 调整手机端字号，防止溢出 */
+            font-size: 1.6rem;
             font-weight: bold;
             margin-bottom: 12px;
             line-height: 1.3;
@@ -127,12 +125,48 @@
             box-sizing: border-box;
             word-break: break-all;
         }
+        
+        /* 新增模块表格样式 */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .stock-calc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background-color: #0f172a;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .stock-calc-table th, .stock-calc-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #1e293b;
+            font-size: 0.95rem;
+        }
+        .stock-calc-table th {
+            background-color: #334155;
+            color: #94a3b8;
+            font-weight: bold;
+        }
+        .result-highlight {
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 15px;
+            background-color: #0f172a;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 15px;
+            border: 1px dashed #475569;
+        }
+
         .text-blue { color: #38bdf8; }
         .text-green { color: #34d399; }
         .text-red { color: #f43f5e; }
         .text-gray { color: #64748b; }
         
-        /* 电脑端大屏优化 */
         @media (min-width: 600px) {
             body { padding: 20px; }
             .header-container {
@@ -145,19 +179,20 @@
                 left: 0;
                 right: 0;
                 display: flex;
-                justify-content: space-between; /* 核心：让两个按钮分居左右两侧 */
-                pointer-events: none; /* 防止层级遮挡标题点击 */
+                justify-content: space-between;
+                pointer-events: none;
             }
             .back-btn { 
                 flex: none; 
                 width: auto; 
                 padding: 8px 16px; 
-                pointer-events: auto; /* 恢复按钮可点击 */
+                pointer-events: auto;
             }
             h1 { flex-grow: 1; font-size: 1.8rem; margin: 0; text-align: center; }
             .card { padding: 25px; }
             h2 { font-size: 1.2rem; }
             .direction-tag { font-size: 2rem; }
+            .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
         }
     </style>
 </head>
@@ -168,9 +203,10 @@
             <a href="index.html" class="back-btn">⬅ 返回首页</a>
             <a href="3.html" class="back-btn">📚记录/笔记 ➡</a>
         </div>
-        <h1>RSI 分析</h1>
+        <h1>RSI & 极值追踪系统</h1>
     </div>
 
+    <!-- 模块 1：原版 RSI 量化核心 -->
     <div class="card">
         <h2>1. 填入量化核心参数</h2>
         
@@ -196,13 +232,98 @@
         </div>
     </div>
 
+    <!-- 新增模块 2：QQQ三剑客开盘高低点计算 -->
+    <div class="card" style="border: 1px solid #fbbf24;">
+        <h2>3. QQQ / TQQQ / SQQQ 当日盘面锚点测算</h2>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: -10px; margin-bottom: 15px;">输入今晚对应的开盘价，系统自动输出大短线高低埋伏点（QQQ按1.2%波幅计算，T/SQQQ按4%三倍波幅计算）。</p>
+        
+        <div class="grid-3">
+            <div>
+                <label style="color: #94a3b8;">QQQ 开盘价 ($)</label>
+                <input type="number" id="price_qqq" value="480.00" step="0.01" oninput="calculateTargets()">
+            </div>
+            <div>
+                <label style="color: #38bdf8;">TQQQ 开盘价 ($)</label>
+                <input type="number" id="price_tqqq" value="77.60" step="0.01" oninput="calculateTargets()">
+            </div>
+            <div>
+                <label style="color: #f43f5e;">SQQQ 开盘价 ($)</label>
+                <input type="number" id="price_sqqq" value="12.50" step="0.01" oninput="calculateTargets()">
+            </div>
+        </div>
+
+        <table class="stock-calc-table">
+            <thead>
+                <tr>
+                    <th>标的</th>
+                    <th class="text-red">极端低点 (-4%)</th>
+                    <th class="text-orange" style="color: #f97316;">平均低点 (-3%)</th>
+                    <th class="text-gray">开盘平均</th>
+                    <th class="text-green">标准高点 (+3%)</th>
+                    <th class="text-blue">极端高点 (+4%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="font-weight: bold;">QQQ (1x)</td>
+                    <td id="qqq_l2" class="text-red">--</td>
+                    <td id="qqq_l1" style="color: #f97316;">--</td>
+                    <td id="qqq_avg" class="text-gray">--</td>
+                    <td id="qqq_h1" class="text-green">--</td>
+                    <td id="qqq_h2" class="text-blue">--</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; color: #38bdf8;">TQQQ (3x)</td>
+                    <td id="tqqq_l2" class="text-red">--</td>
+                    <td id="tqqq_l1" style="color: #f97316;">--</td>
+                    <td id="tqqq_avg" class="text-gray">--</td>
+                    <td id="tqqq_h1" class="text-green">--</td>
+                    <td id="tqqq_h2" class="text-blue">--</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; color: #f43f5e;">SQQQ (3x)</td>
+                    <td id="sqqq_l2" class="text-red">--</td>
+                    <td id="sqqq_l1" style="color: #f97316;">--</td>
+                    <td id="sqqq_avg" class="text-gray">--</td>
+                    <td id="sqqq_h1" class="text-green">--</td>
+                    <td id="sqqq_h2" class="text-blue">--</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 新增模块 3：个人个股账目与换算器 -->
+    <div class="card" style="border: 1px solid #34d399;">
+        <h2>4. 持仓盈亏与汇率联动换算账本</h2>
+        
+        <div class="grid-3">
+            <div>
+                <label>股票当前成本价 (USD)</label>
+                <input type="number" id="trade_buy_price" value="75.27" step="0.01" oninput="calculatePnL()">
+            </div>
+            <div>
+                <label>持股数量 (股)</label>
+                <input type="number" id="trade_shares" value="11" step="1" oninput="calculatePnL()">
+            </div>
+            <div>
+                <label style="color: #34d399;">预期卖出价格 (USD)</label>
+                <input type="number" id="trade_sell_price" value="76.02" step="0.01" oninput="calculatePnL()">
+            </div>
+        </div>
+        
+        <label style="color: #a78bfa;">当下美金兑马币汇率 (USD/MYR)</label>
+        <input type="number" id="exchange_rate" value="4.06" step="0.0001" placeholder="例如: 4.7150" oninput="calculatePnL()">
+
+        <div class="result-highlight" id="pnl_result_box">
+            价格差距：<span id="pnl_percent">--</span> <br>
+            预估盈亏：<span id="pnl_usd">--</span> / <span id="pnl_myr">--</span>
+        </div>
+    </div>
+
     <script>
-        // 核心中央决策引擎
+        // ================= 1. 原版 RSI 核心引擎 =================
         function runDecisionEngine() {
-            // 直接读取手动输入的 RSI 值
             const rsiInput = document.getElementById('txt_manual_rsi').value;
-            
-            // 拦截空输入或者不合法数字
             if (rsiInput === "" || rsiInput === null) {
                 resetDisplay();
                 return;
@@ -227,7 +348,6 @@
             let winRate = 0.50;
             let actionClass = "";
 
-            // 铁血动量判定信号
             if (rsi >= 55) {
                 direction = "📈 建议买入：TQQQ (看多纳指)";
                 actionClass = "direction-tag text-blue";
@@ -251,11 +371,10 @@
             actionLbl.className = actionClass;
             rateLbl.innerText = "预估今晚胜率：" + (winRate * 100).toFixed(1) + "%";
 
-            // 凯利公式算账
             if (winRate > 0.50 && capital > 0) {
                 const p = winRate;
                 const q = 1 - p;
-                const b = 3 / 1.5; // 3%止盈 / 1.5%止损 = 赔率 2
+                const b = 3 / 1.5; 
                 let f = (p * b - q) / b;
                 if (f < 0) f = 0;
                 
@@ -273,7 +392,6 @@
             }
         }
 
-        // 重置未输入时的界面状态
         function resetDisplay() {
             document.getElementById('lbl_action').innerText = "--";
             document.getElementById('lbl_action').className = "direction-tag text-gray";
@@ -283,9 +401,100 @@
             document.getElementById('result_box').style.borderColor = "#1e293b";
         }
 
-        // 页面加载时自动运行一次初始值的计算
+        // ================= 2. 新增：QQQ三剑客锚点点位计算 =================
+        function calculateTargets() {
+            const qqqBase = parseFloat(document.getElementById('price_qqq').value) || 0;
+            const tqqqBase = parseFloat(document.getElementById('price_tqqq').value) || 0;
+            const sqqqBase = parseFloat(document.getElementById('price_sqqq').value) || 0;
+
+            // QQQ 1倍权重波动小，标准设为日均 ±0.9% 和 ±1.2%
+            if(qqqBase > 0) {
+                document.getElementById('qqq_l2').innerText = `$${(qqqBase * 0.988).toFixed(2)}`;
+                document.getElementById('qqq_l1').innerText = `$${(qqqBase * 0.991).toFixed(2)}`;
+                document.getElementById('qqq_avg').innerText = `$${qqqBase.toFixed(2)}`;
+                document.getElementById('qqq_h1').innerText = `$${(qqqBase * 1.009).toFixed(2)}`;
+                document.getElementById('qqq_h2').innerText = `$${(qqqBase * 1.012).toFixed(2)}`;
+            }
+
+            // TQQQ 3倍波动，标准设为大短线的 ±3% 和 ±4%
+            if(tqqqBase > 0) {
+                document.getElementById('tqqq_l2').innerText = `$${(tqqqBase * 0.96).toFixed(2)}`;
+                document.getElementById('tqqq_l1').innerText = `$${(tqqqBase * 0.97).toFixed(2)}`;
+                document.getElementById('tqqq_avg').innerText = `$${tqqqBase.toFixed(2)}`;
+                document.getElementById('tqqq_h1').innerText = `$${(tqqqBase * 1.03).toFixed(2)}`;
+                document.getElementById('tqqq_h2').innerText = `$${(tqqqBase * 1.04).toFixed(2)}`;
+            }
+
+            // SQQQ 3倍反向波动，标准同为 ±3% 和 ±4%
+            if(sqqqBase > 0) {
+                document.getElementById('sqqq_l2').innerText = `$${(sqqqBase * 0.96).toFixed(2)}`;
+                document.getElementById('sqqq_l1').innerText = `$${(sqqqBase * 0.97).toFixed(2)}`;
+                document.getElementById('sqqq_avg').innerText = `$${sqqqBase.toFixed(2)}`;
+                document.getElementById('sqqq_h1').innerText = `$${(sqqqBase * 1.03).toFixed(2)}`;
+                document.getElementById('sqqq_h2').innerText = `$${(sqqqBase * 1.04).toFixed(2)}`;
+            }
+        }
+
+        // ================= 3. 新增：个股持仓多币种盈亏换算 =================
+        function calculatePnL() {
+            const buyPrice = parseFloat(document.getElementById('trade_buy_price').value) || 0;
+            const shares = parseFloat(document.getElementById('trade_shares').value) || 0;
+            const sellPrice = parseFloat(document.getElementById('trade_sell_price').value) || 0;
+            const fxRate = parseFloat(document.getElementById('exchange_rate').value) || 0;
+
+            const percentEl = document.getElementById('pnl_percent');
+            const usdEl = document.getElementById('pnl_usd');
+            const myrEl = document.getElementById('pnl_myr');
+            const boxEl = document.getElementById('pnl_result_box');
+
+            if (buyPrice <= 0 || shares <= 0 || sellPrice <= 0 || fxRate <= 0) {
+                percentEl.innerText = "--";
+                usdEl.innerText = "--";
+                myrEl.innerText = "--";
+                boxEl.style.color = "#f1f5f9";
+                boxEl.style.borderColor = "#475569";
+                return;
+            }
+
+            // 计算价格差距百分比
+            const diffPercent = ((sellPrice - buyPrice) / buyPrice) * 100;
+            
+            // 计算美金盈亏与马币盈亏
+            const totalCostUSD = buyPrice * shares;
+            const totalSellUSD = sellPrice * shares;
+            const profitUSD = totalSellUSD - totalCostUSD;
+            const profitMYR = profitUSD * fxRate;
+
+            // 渲染百分比文字
+            if (diffPercent >= 0) {
+                percentEl.innerText = `+${diffPercent.toFixed(2)}%`;
+                percentEl.className = "text-green";
+            } else {
+                percentEl.innerText = `${diffPercent.toFixed(2)}%`;
+                percentEl.className = "text-red";
+            }
+
+            // 渲染盈亏金额及框体边框颜色
+            if (profitUSD >= 0) {
+                usdEl.innerText = `赚 $${profitUSD.toFixed(2)} USD`;
+                usdEl.className = "text-green";
+                myrEl.innerText = `赚 RM ${profitMYR.toFixed(2)} MYR`;
+                myrEl.className = "text-green";
+                boxEl.style.borderColor = "#34d399";
+            } else {
+                usdEl.innerText = `亏 $${Math.abs(profitUSD).toFixed(2)} USD`;
+                usdEl.className = "text-red";
+                myrEl.innerText = `亏 RM ${Math.abs(profitMYR).toFixed(2)} MYR`;
+                myrEl.className = "text-red";
+                boxEl.style.borderColor = "#f43f5e";
+            }
+        }
+
+        // ================= 4. 初始化加载 =================
         window.onload = function() {
             runDecisionEngine();
+            calculateTargets();
+            calculatePnL();
         };
     </script>
 </body>
