@@ -1,350 +1,229 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>大馬深夜提款機 v3.0 - 核心面板</title>
-    <style>
-        :root {
-            --bg: #0b0f19;
-            --card: #1e293b;
-            --blue: #1890ff;
-            --green: #52c41a;
-            --red: #ff4d4f;
-            --yellow: #faad14;
-            --text: #ffffff;
-            --input-bg: #0f172a;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TQQQ 目标计算器</title>
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+<style>
+/* ======================
+   BASE (手机优先)
+====================== */
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-        }
+body {
+    margin:0;
+    padding:12px;
+    background:#0b1120;
+    color:#f1f5f9;
+    font-family: Arial, sans-serif;
+}
 
-        h1 {
-            text-align: center;
-            color: var(--blue);
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-        }
+.container {
+    max-width: 600px;
+    margin:auto;
+}
 
-        /* 導航按鈕 */
-        .nav-container {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
+/* 标题 */
+h1 {
+    text-align:center;
+    font-size:20px;
+    color:#38bdf8;
+    margin-bottom:12px;
+}
 
-        .nav-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 15px;
-            background: rgba(24, 144, 255, 0.1);
-            border: 1px solid var(--blue);
-            color: var(--blue);
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
+/* ======================
+   NAV
+====================== */
 
-        .nav-btn:hover {
-            background: var(--blue);
-            color: white;
-        }
+.nav-container {
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+}
 
-        /* 狀態卡片 */
-        .card {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
+.nav-btn {
+    flex:1;
+    text-align:center;
+    padding:10px;
+    font-size:13px;
+    background:rgba(56,189,248,0.1);
+    border:1px solid #38bdf8;
+    color:#38bdf8;
+    border-radius:10px;
+    text-decoration:none;
+}
 
-        .status-card {
-            text-align: center;
-            border-left: 8px solid #666;
-            transition: border-color 0.5s;
-        }
+/* ======================
+   CARD
+====================== */
 
-        .time {
-            font-size: 2.2rem;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
+.card {
+    background:#1e293b;
+    padding:14px;
+    border-radius:14px;
+}
 
-        .statusText {
-            margin-top: 8px;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
+/* 输入框 */
+label {
+    font-size:12px;
+    color:#94a3b8;
+}
 
-        /* 輸入區域 */
-        .input-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
+input {
+    width:100%;
+    padding:14px;
+    margin:6px 0 10px;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    background:#0f172a;
+    color:#fff;
+    outline:none;
+}
 
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #94a3b8;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
+/* ======================
+   BUTTON
+====================== */
 
-        input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            background: var(--input-bg);
-            color: white;
-            font-size: 1rem;
-            box-sizing: border-box;
-            outline: none;
-        }
+.calc-btn {
+    width:100%;
+    padding:16px;
+    margin-bottom:12px;
+    border:none;
+    border-radius:12px;
+    background:#38bdf8;
+    color:#0b1120;
+    font-weight:bold;
+    font-size:16px;
+}
 
-        input:focus {
-            border-color: var(--blue);
-        }
+/* ======================
+   RESULT
+====================== */
 
-        /* 結果顯示 */
-        .total-info {
-            display: flex;
-            justify-content: space-between;
-            margin: 15px 5px;
-            font-size: 0.9rem;
-            color: #94a3b8;
-        }
+.result {
+    display:grid;
+    gap:10px;
+    margin-top:12px;
+}
 
-        .total-info b {
-            color: var(--yellow);
-        }
+.box {
+    background:#0f172a;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid #334155;
+}
 
-        .result-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 15px;
-        }
+.title {
+    font-size:12px;
+    color:#94a3b8;
+}
 
-        .box {
-            padding: 15px;
-            border-radius: 15px;
-            text-align: center;
-            transition: transform 0.2s;
-        }
+.value {
+    font-size:18px;
+    font-weight:bold;
+    margin-top:4px;
+}
 
-        .tp { background: rgba(82, 196, 26, 0.1); border: 1px solid var(--green); }
-        .sl { background: rgba(255, 77, 79, 0.1); border: 1px solid var(--red); }
-        .custom { background: rgba(24, 144, 255, 0.1); border: 1px solid var(--blue); grid-column: span 2; }
+.green { color:#4ade80; }
+.blue { color:#38bdf8; }
+.yellow { color:#fbbf24; }
 
-        .res-label { font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
-        .value { font-size: 1.6rem; font-family: monospace; font-weight: bold; margin: 5px 0; }
-        .profit { font-size: 0.85rem; font-weight: bold; }
+/* ======================
+   桌面优化（>=768px）
+====================== */
 
-        /* 救命設定卡片 */
-        .alert-card {
-            background: rgba(24, 144, 255, 0.05);
-            border: 1px dashed var(--blue);
-            border-radius: 15px;
-            padding: 15px;
-            font-size: 0.85rem;
-            line-height: 1.6;
-            color: #94a3b8;
-        }
-    </style>
+@media (min-width: 768px) {
+    body {
+        padding:20px;
+    }
+
+    h1 {
+        font-size:26px;
+    }
+
+    .card {
+        padding:20px;
+    }
+
+    .nav-btn {
+        font-size:14px;
+        padding:12px;
+    }
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-    <h1>💸 首页 💸</h1>
+<h1>📊 TQQQ 目标计算器</h1>
 
-    <!-- 導航按鈕 -->
-    <div class="nav-container">
-        <a href="rsi.html" class="nav-btn">📊 RSI分析</a>
-        <a href="3.html" class="nav-btn">🏠 记录/笔记</a>
-    </div>
+<!-- NAV -->
+<div class="nav-container">
+    <a class="nav-btn" href="rsi.html">📊 RSI分析</a>
+    <a class="nav-btn" href="3.html">🏠 记录</a>
+</div>
 
-    <!-- 1. 市場狀態 -->
-    <div class="card status-card" id="statusCard">
-        <div class="time" id="liveTime">00:00:00</div>
-        <div id="statusText" class="statusText">市場狀態檢測中...</div>
-    </div>
+<div class="card">
 
-    <!-- 2. 輸入面板 -->
-    <div class="card">
-        <div class="input-grid">
-            <div>
-                <label>買入價格 (USD)</label>
-                <input type="number" id="buyPrice" placeholder="0.00" step="0.01">
-            </div>
-            <div>
-                <label>股數 (Shares)</label>
-                <input type="number" id="shares" value="50">
-            </div>
-            <div>
-                <label>實時匯率 (MYR/USD)</label>
-                <input type="number" id="fxRate" value="4.07" step="0.01">
-            </div>
-            <div>
-                <label>止盈百分比 (%)</label>
-                <input type="number" id="tpPercent" value="3" step="0.1">
-            </div>
-            <div>
-                <label>止損百分比 (%)</label>
-                <input type="number" id="slPercent" value="1.5" step="0.1">
-            </div>
-            <div>
-                <label>自定義目標 (%)</label>
-                <input type="number" id="customPercent" value="5" step="0.1">
-            </div>
-        </div>
+<button class="calc-btn" onclick="calc()">🚀 计算目标</button>
 
-        <div class="total-info">
-            <div>所需本金 USD: <b id="usdCapital">$0.00</b></div>
-            <div>折合馬幣: <b id="myrCapital">0 MYR</b></div>
-        </div>
+<label>本金 (USD)</label>
+<input id="capital" type="number" placeholder="例如 3000">
 
-        <!-- 計算結果 -->
-        <div class="result-grid">
-            <div class="box tp">
-                <div class="res-label" style="color: var(--green);">🎯 核心止盈</div>
-                <div class="value" id="tpPrice" style="color: #73d13d;">--</div>
-                <div class="profit" id="tpProfit" style="color: #73d13d;">0</div>
-            </div>
+<label>目标 (%)</label>
+<input id="percent" type="number" value="2.3" step="0.1">
 
-            <div class="box sl">
-                <div class="res-label" style="color: var(--red);">🛑 鋼鐵止損</div>
-                <div class="value" id="slPrice" style="color: #ff7875;">--</div>
-                <div class="profit" id="slLoss" style="color: #ff7875;">0</div>
-            </div>
+<label>汇率 (USD → MYR)</label>
+<input id="fx" type="number" value="4.07" step="0.01">
 
-            <div class="box custom">
-                <div class="res-label" style="color: var(--blue);">🚀 自定義目標追蹤</div>
-                <div class="value" id="customPrice" style="color: var(--blue);">--</div>
-                <div class="profit" id="customProfit" style="color: var(--blue);">0</div>
-            </div>
-        </div>
-    </div>
+<div class="result" id="result"></div>
 
-    <!-- 3. OCO 設定提醒 -->
-    <div class="alert-card">
-        <b>投资理念</b><br>
-        • 不要亏钱<b> Never Lose Your Money</b><br>
-        • 不懂不碰 <b> Never buy what you don't understand</b><br>
-        • 不要停止复利<b> Never interrupt compounding interest</b><br>
-        • 保持耐心和延迟满足<b> Be patient and delay gratification</b><br>
-        • 不要亏钱<b> Never Lose Your Money</b><br>
-        • 买股票就是买公司部分所有权<b> Be Owner, Not Seller</b><br>
-    </div>
+</div>
 
 </div>
 
 <script>
-function updateClock(){
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2,"0");
-    const m = String(now.getMinutes()).padStart(2,"0");
-    const s = String(now.getSeconds()).padStart(2,"0");
+function calc() {
+    let capital = parseFloat(document.getElementById("capital").value);
+    let percent = parseFloat(document.getElementById("percent").value);
+    let fx = parseFloat(document.getElementById("fx").value);
 
-    document.getElementById("liveTime").innerText = `${h}:${m}:${s}`;
+    if (!capital || !percent) return;
 
-    const total = now.getHours()*60 + now.getMinutes();
-    const card = document.getElementById("statusCard");
-    const text = document.getElementById("statusText");
+    let profitUSD = capital * percent / 100;
+    let profitMYR = profitUSD * fx;
+    let target = capital + profitUSD;
 
-    if(total >= 1290 && total < 1320){
-        card.style.borderColor = "var(--red)";
-        text.innerHTML = "❌ 散戶混亂期 (不穩) - 建議觀望";
-        text.style.color = "var(--red)";
-    }
-    else if(total >= 1320 && total < 1350){
-        card.style.borderColor = "var(--green)";
-        text.innerHTML = "🟢 趨勢確立期 (最穩) - 準備進場";
-        text.style.color = "var(--green)";
-    }
-    else if(total >= 1350 || total < 240){
-        card.style.borderColor = "var(--yellow)";
-        text.innerHTML = "🌙 睡覺流時間 - 交給系統自動跑";
-        text.style.color = "var(--yellow)";
-    }
-    else{
-        card.style.borderColor = "#666";
-        text.innerHTML = "💤 美股未開盤 - 養精蓄銳";
-        text.style.color = "#94a3b8";
-    }
+    document.getElementById("result").innerHTML = `
+        <div class="box">
+            <div class="title">本金</div>
+            <div class="value">$${capital.toFixed(2)}</div>
+        </div>
+
+        <div class="box">
+            <div class="title">目标收益率</div>
+            <div class="value blue">${percent}%</div>
+        </div>
+
+        <div class="box">
+            <div class="title">盈利（USD）</div>
+            <div class="value green">$${profitUSD.toFixed(2)}</div>
+        </div>
+
+        <div class="box">
+            <div class="title">盈利（MYR）</div>
+            <div class="value green">RM ${profitMYR.toFixed(2)}</div>
+        </div>
+
+        <div class="box">
+            <div class="title">建议</div>
+            <div class="value yellow">达到目标可分批止盈</div>
+        </div>
+    `;
 }
-
-function calculate(){
-    const buyPrice = parseFloat(document.getElementById("buyPrice").value);
-    const shares = parseFloat(document.getElementById("shares").value);
-    const fxRate = parseFloat(document.getElementById("fxRate").value);
-    const tpPercent = parseFloat(document.getElementById("tpPercent").value);
-    const slPercent = parseFloat(document.getElementById("slPercent").value);
-    const customPercent = parseFloat(document.getElementById("customPercent").value);
-
-    if(isNaN(buyPrice) || isNaN(shares) || buyPrice <= 0 || shares <= 0){
-        return;
-    }
-
-    const capitalUsd = buyPrice * shares;
-    const capitalMyr = capitalUsd * fxRate;
-
-    document.getElementById("usdCapital").innerText = "$" + capitalUsd.toFixed(2);
-    document.getElementById("myrCapital").innerText = Math.round(capitalMyr) + " MYR";
-
-    // 止盈計算
-    const tpPrice = buyPrice * (1 + tpPercent/100);
-    const tpProfitUsd = (tpPrice - buyPrice) * shares;
-    const tpProfitMyr = tpProfitUsd * fxRate;
-    document.getElementById("tpPrice").innerText = "$" + tpPrice.toFixed(2);
-    document.getElementById("tpProfit").innerHTML = `+${tpProfitUsd.toFixed(2)} USD (+${Math.round(tpProfitMyr)} MYR)`;
-
-    // 止損計算
-    const slPrice = buyPrice * (1 - slPercent/100);
-    const slLossUsd = (buyPrice - slPrice) * shares;
-    const slLossMyr = slLossUsd * fxRate;
-    document.getElementById("slPrice").innerText = "$" + slPrice.toFixed(2);
-    document.getElementById("slLoss").innerHTML = `-${slLossUsd.toFixed(2)} USD (-${Math.round(slLossMyr)} MYR)`;
-
-    // 自定義計算
-    const customPrice = buyPrice * (1 + customPercent/100);
-    const customDiffUsd = (customPrice - buyPrice) * shares;
-    const customDiffMyr = customDiffUsd * fxRate;
-    
-    document.getElementById("customPrice").innerText = "$" + customPrice.toFixed(2);
-    const sign = customPercent >= 0 ? "+" : "";
-    document.getElementById("customProfit").innerHTML = `${sign}${customDiffUsd.toFixed(2)} USD (${sign}${Math.round(customDiffMyr)} MYR)`;
-}
-
-// 監聽所有輸入框，達成實時更新
-document.querySelectorAll("input").forEach(input => {
-    input.addEventListener("input", calculate);
-});
-
-setInterval(updateClock, 1000);
-updateClock();
-calculate(); // 初始化計算一次
 </script>
 
 </body>
