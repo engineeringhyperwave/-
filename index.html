@@ -6,6 +6,7 @@
 <title>TQQQ 完整交易工具</title>
 
 <style>
+
 body{
     margin:0;
     padding:12px;
@@ -22,6 +23,26 @@ body{
 h1{
     text-align:center;
     color:#38bdf8;
+}
+
+/* 🔵 导航栏 */
+.nav-container{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+    margin-bottom:12px;
+}
+
+.nav-btn{
+    flex:1;
+    text-align:center;
+    padding:10px;
+    font-size:13px;
+    background:rgba(56,189,248,0.1);
+    border:1px solid #38bdf8;
+    color:#38bdf8;
+    border-radius:10px;
+    text-decoration:none;
 }
 
 .card{
@@ -93,6 +114,14 @@ button{
 
 <h1>📊 TQQQ 完整交易工具</h1>
 
+<!-- 🔵 导航按钮（已修复） -->
+<div class="nav-container">
+    <a class="nav-btn" href="rsi.html">📊 RSI分析</a>
+    <a class="nav-btn" href="3.html">🏠 记录</a>
+</div>
+
+---
+
 <!-- ========================= -->
 <!-- 功能1 -->
 <!-- ========================= -->
@@ -114,6 +143,8 @@ button{
 <div id="result1"></div>
 
 </div>
+
+---
 
 <!-- ========================= -->
 <!-- 功能2 -->
@@ -139,6 +170,8 @@ button{
 <div id="result2"></div>
 
 </div>
+
+---
 
 <!-- ========================= -->
 <!-- 功能3 -->
@@ -237,10 +270,11 @@ document.getElementById("result2").innerHTML = `
 
 //
 // =========================
-// 功能3（概率模型）
+// 功能3
 // =========================
 //
 
+// 内置R分布
 const rData = [
   0.005, 0.012, 0.018, 0.021, 0.015,
   0.028, 0.033, 0.019, 0.014, 0.025,
@@ -288,7 +322,7 @@ document.getElementById("result3").innerHTML = `
 </div>
 
 <div class="box">
-<div class="title">🟡 70%</div>
+<div class="title">🟡 70% ⭐</div>
 <div class="value">${(open*(1+p70)).toFixed(2)}</div>
 </div>
 
