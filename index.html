@@ -3,29 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TQQQ 完整交易工具</title>
+<title>TQQQ 5合1 完整交易工具</title>
 
 <style>
-
-body{
-    margin:0;
-    padding:12px;
-    background:#0b1120;
-    color:#f1f5f9;
-    font-family:Arial;
-}
-
-.container{
-    max-width:650px;
-    margin:auto;
-}
-
-h1{
-    text-align:center;
-    color:#38bdf8;
-}
-
-/* 🔵 导航栏 */
 .nav-container{
     display:flex;
     gap:8px;
@@ -43,6 +23,32 @@ h1{
     color:#38bdf8;
     border-radius:10px;
     text-decoration:none;
+}
+
+body{
+    margin:0;
+    padding:12px;
+    background:#0b1120;
+    color:#f1f5f9;
+    font-family:Arial;
+}
+
+.container{
+    max-width:650px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:#38bdf8;
+    font-size: 24px;
+}
+
+h3{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: #38bdf8;
+    font-size: 16px;
 }
 
 .card{
@@ -68,6 +74,7 @@ input{
     background:#0f172a;
     color:white;
     font-size:15px;
+    box-sizing: border-box;
 }
 
 button{
@@ -79,6 +86,26 @@ button{
     background:#38bdf8;
     font-weight:bold;
     cursor:pointer;
+    color: #0b1120;
+}
+
+.progress{
+    height:25px;
+    background:#334155;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:12px;
+}
+
+.bar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#22c55e,#4ade80);
+    text-align:center;
+    line-height:25px;
+    color:white;
+    font-weight:bold;
+    transition:.4s;
 }
 
 .box{
@@ -95,9 +122,10 @@ button{
 }
 
 .value{
-    font-size:18px;
+    font-size:17px;
     font-weight:bold;
     margin-top:5px;
+    line-height: 1.5;
 }
 
 .green{color:#4ade80;}
@@ -105,6 +133,16 @@ button{
 .yellow{color:#fbbf24;}
 .red{color:#ef4444;}
 
+.history{
+    margin-top:10px;
+    background:#020617;
+    padding:10px;
+    border-radius:10px;
+    max-height:250px;
+    overflow:auto;
+    font-size:13px;
+    white-space: pre-line;
+}
 </style>
 </head>
 
@@ -112,231 +150,291 @@ button{
 
 <div class="container">
 
-<h1>📊 TQQQ 完整交易工具</h1>
+<h1>📊 TQQQ 5合1 完整交易工具</h1>
 
-<!-- 🔵 导航按钮（已修复） -->
+<!-- 🔵 导航栏 -->
 <div class="nav-container">
     <a class="nav-btn" href="rsi.html">📊 RSI分析</a>
     <a class="nav-btn" href="3.html">🏠 记录</a>
 </div>
 
----
-
-<!-- ========================= -->
-<!-- 功能1 -->
-<!-- ========================= -->
+<!-- ==================================== -->
+<!-- 功能1：单次收益 -->
+<!-- ==================================== -->
 <div class="card">
+    <h3>📊 功能1：单次收益</h3>
+    <label>本金 (USD)</label>
+    <input type="number" id="capitalUSD" value="5000">
 
-<h3>📊 功能1：单次收益</h3>
+    <label>目标 (%)</label>
+    <input type="number" id="percent1" value="2.3">
 
-<label>本金 (USD)</label>
-<input id="capitalUSD">
+    <label>汇率</label>
+    <input type="number" id="fx1" value="4.07">
 
-<label>目标 (%)</label>
-<input id="percent1" value="2.3">
-
-<label>汇率</label>
-<input id="fx1" value="4.07">
-
-<button onclick="calc1()">计算单次收益</button>
-
-<div id="result1"></div>
-
+    <button onclick="calc1()">计算单次收益</button>
+    <div id="result1"></div>
 </div>
 
----
-
-<!-- ========================= -->
-<!-- 功能2 -->
-<!-- ========================= -->
+<!-- ==================================== -->
+<!-- 功能2：目标回合计算 -->
+<!-- ==================================== -->
 <div class="card">
+    <h3>🎯 功能2：目标回合计算</h3>
+    <label>当前本金 (MYR)</label>
+    <input type="number" id="capitalMYR" value="10000">
 
-<h3>🔁 功能2：目标回合计算</h3>
+    <label>目标金额 (MYR)</label>
+    <input type="number" id="targetMYR" value="30000">
 
-<label>当前本金 (MYR)</label>
-<input id="capitalMYR">
+    <label>每回合 (%)</label>
+    <input type="number" id="percent2" value="2.3">
 
-<label>目标金额 (MYR)</label>
-<input id="targetMYR">
+    <label>汇率</label>
+    <input type="number" id="fx2" value="4.07">
 
-<label>每回合 (%)</label>
-<input id="percent2" value="2.3">
+    <button onclick="calc2()">计算目标回合</button>
 
-<label>汇率</label>
-<input id="fx2" value="4.07">
+    <div class="progress">
+        <div class="bar" id="bar">0%</div>
+    </div>
 
-<button onclick="calc2()">计算回合</button>
-
-<div id="result2"></div>
-
+    <div id="result2"></div>
+    <div class="history" id="history"></div>
 </div>
 
----
-
-<!-- ========================= -->
-<!-- 功能3 -->
-<!-- ========================= -->
+<!-- ==================================== -->
+<!-- 功能3：TQQQ/SQQQ 日内双向振幅预测 -->
+<!-- ==================================== -->
 <div class="card">
+    <h3>📈 功能3：日内双向振幅概率预判</h3>
+    <label>今日开盘价 (Open Price)</label>
+    <input type="number" id="openUniversal" value="76.80" step="0.01">
 
-<h3>📈 功能3：TQQQ概率区间模型</h3>
+    <button onclick="calc3()">一键预判今日 High & Low</button>
+    <div id="result3"></div>
+</div>
 
-<label>Open Price (TQQQ)</label>
-<input id="open3" placeholder="例如 76.80">
+<!-- ==================================== -->
+<!-- 功能4：目标收益价格计算器 -->
+<!-- ==================================== -->
+<div class="card">
+    <h3>🎯 功能4：目标收益价格计算器</h3>
+    <label>买入价格 (USD)</label>
+    <input type="number" id="target_buy" value="73.07" step="0.01">
 
-<button onclick="calc3()">计算概率区间</button>
+    <label>目标涨跌幅 (%)</label>
+    <input type="number" id="target_pct" value="2.3" step="0.1">
 
-<div id="result3"></div>
+    <button onclick="calc4()">计算目标涨跌价格</button>
+    <div id="result4"></div>
+</div>
 
+<!-- ==================================== -->
+<!-- 功能5：持仓盈亏与汇率换算 -->
+<!-- ==================================== -->
+<div class="card">
+    <h3>💰 功能5：持仓盈亏与汇率换算</h3>
+    <label>买入价格 (USD)</label>
+    <input type="number" id="buy" value="75.27" step="0.01">
+
+    <label>持股数量</label>
+    <input type="number" id="shares" value="11">
+
+    <label>卖出价格 (USD)</label>
+    <input type="number" id="sell" value="76.02" step="0.01">
+
+    <label>汇率 (USD → MYR)</label>
+    <input type="number" id="fx" value="4.06" step="0.01">
+
+    <button onclick="calc5()">计算实际持仓盈亏</button>
+    <div id="result5"></div>
 </div>
 
 </div>
 
 <script>
-
-//
-// =========================
-// 功能1
-// =========================
-//
+// ====================================
+// 功能1：单次收益
+// ====================================
 function calc1(){
+    let capitalUSD = +document.getElementById("capitalUSD").value;
+    let percent = +document.getElementById("percent1").value;
+    let fx = +document.getElementById("fx1").value;
 
-let capitalUSD = +document.getElementById("capitalUSD").value;
-let percent = +document.getElementById("percent1").value;
-let fx = +document.getElementById("fx1").value;
+    if(!capitalUSD) return;
 
-let profitUSD = capitalUSD * percent / 100;
-let profitMYR = profitUSD * fx;
+    let profitUSD = capitalUSD * percent / 100;
+    let profitMYR = profitUSD * fx;
 
-document.getElementById("result1").innerHTML = `
-<div class="box">
-<div class="title">盈利 USD</div>
-<div class="value green">$${profitUSD.toFixed(2)}</div>
-</div>
-
-<div class="box">
-<div class="title">盈利 MYR</div>
-<div class="value green">RM ${profitMYR.toFixed(2)}</div>
-</div>
-`;
+    document.getElementById("result1").innerHTML = `
+        <div class="box">
+            <div class="title">盈利 USD</div>
+            <div class="value green">$${profitUSD.toFixed(2)}</div>
+        </div>
+        <div class="box">
+            <div class="title">盈利 MYR</div>
+            <div class="value green">RM ${profitMYR.toFixed(2)}</div>
+        </div>
+    `;
 }
 
-//
-// =========================
-// 功能2
-// =========================
-//
+// ====================================
+// 功能2：目标回合
+// ====================================
 function calc2(){
+    let capitalMYR = +document.getElementById("capitalMYR").value;
+    let target = +document.getElementById("targetMYR").value;
+    let percent = +document.getElementById("percent2").value;
+    let fx = +document.getElementById("fx2").value;
 
-let capitalMYR = +document.getElementById("capitalMYR").value;
-let target = +document.getElementById("targetMYR").value;
-let percent = +document.getElementById("percent2").value;
-let fx = +document.getElementById("fx2").value;
+    if(!capitalMYR || !target) return;
 
-const fee = 4 * fx;
+    const fee = 4 * fx;
+    let current = capitalMYR;
+    let round = 0;
+    let history = "";
 
-let current = capitalMYR;
-let round = 0;
+    if ((current * percent / 100) <= fee) {
+        alert("⚠️ 错误：每期盈利不足以扣除摩擦手续费，无法滚存！");
+        return;
+    }
 
-while(current < target && round < 1000){
+    while(current < target && round < 1000){
+        let before = current;
+        let profit = before * percent / 100;
+        current = before + profit - fee;
+        round++;
+        history += `第 ${round} 回合：RM ${current.toFixed(2)}\n`;
+    }
 
-let profit = current * percent / 100;
-current = current + profit - fee;
+    let progress = (capitalMYR / target) * 100;
+    if(progress > 100) progress = 100;
 
-round++;
+    document.getElementById("bar").style.width = progress + "%";
+    document.getElementById("bar").innerHTML = progress.toFixed(1) + "%";
+
+    document.getElementById("result2").innerHTML = `
+        <div class="box">
+            <div class="title">当前本金</div>
+            <div class="value blue">RM ${capitalMYR.toFixed(2)}</div>
+        </div>
+        <div class="box">
+            <div class="title">目标</div>
+            <div class="value green">RM ${target.toFixed(2)}</div>
+        </div>
+        <div class="box">
+            <div class="title">需要回合</div>
+            <div class="value yellow">${round} 次</div>
+        </div>
+        <div class="box">
+            <div class="title">预计最终</div>
+            <div class="value green">RM ${current.toFixed(2)}</div>
+        </div>
+    `;
+    document.getElementById("history").innerText = history;
 }
 
-document.getElementById("result2").innerHTML = `
-<div class="box">
-<div class="title">当前本金</div>
-<div class="value blue">RM ${capitalMYR.toFixed(2)}</div>
-</div>
-
-<div class="box">
-<div class="title">目标</div>
-<div class="value green">RM ${target.toFixed(2)}</div>
-</div>
-
-<div class="box">
-<div class="title">需要回合</div>
-<div class="value yellow">${round}</div>
-</div>
-
-<div class="box">
-<div class="title">预计结果</div>
-<div class="value green">RM ${current.toFixed(2)}</div>
-</div>
-`;
-}
-
-//
-// =========================
-// 功能3
-// =========================
-//
-
-// 内置R分布
-const rData = [
-  0.005, 0.012, 0.018, 0.021, 0.015,
-  0.028, 0.033, 0.019, 0.014, 0.025,
-  0.031, 0.022, 0.017, 0.029, 0.034,
-  0.011, 0.016, 0.027, 0.023, 0.030,
-  0.020, 0.013, 0.026, 0.032, 0.010,
-  0.038, 0.041, 0.045, 0.024, 0.018,
-  0.009, 0.015, 0.021, 0.035, 0.037,
-  0.019, 0.012, 0.028, 0.033, 0.020
+// ====================================
+// 功能3：日内双向振幅概率预判
+// ====================================
+const volatilityData = [
+  0.006, 0.012, 0.018, 0.022, 0.015, 0.028, 0.035, 0.019, 0.014, 0.025,
+  0.031, 0.024, 0.017, 0.029, 0.034, 0.011, 0.016, 0.027, 0.023, 0.030,
+  0.020, 0.013, 0.026, 0.032, 0.010, 0.038, 0.042, 0.048, 0.024, 0.018,
+  0.009, 0.015, 0.021, 0.036, 0.039, 0.019, 0.012, 0.028, 0.033, 0.020
 ];
 
-function percentile(arr, p){
-    let a = [...arr].sort((a,b)=>a-b);
-    let i = (p/100)*(a.length-1);
-    let l = Math.floor(i);
-    let u = Math.ceil(i);
-    return a[l] + (a[u]-a[l])*(i-l);
+function getPercentile(arr, p){
+    let sorted = [...arr].sort((a,b)=>a-b);
+    let index = (p/100)*(sorted.length-1);
+    let lower = Math.floor(index);
+    let upper = Math.ceil(index);
+    return sorted[lower] + (sorted[upper]-sorted[lower])*(index-lower);
 }
 
 function calc3(){
+    let open = +document.getElementById("openUniversal").value;
+    if(!open || open <= 0) return;
 
-let open = +document.getElementById("open3").value;
+    let v20 = getPercentile(volatilityData, 20); 
+    let v50 = getPercentile(volatilityData, 50); 
+    let v75 = getPercentile(volatilityData, 75); 
+    let v90 = getPercentile(volatilityData, 90); 
 
-if(!open){
-    alert("请输入Open");
-    return;
+    document.getElementById("result3").innerHTML = `
+        <div class="box">
+            <div class="title" style="color:#38bdf8; font-weight:bold; margin-bottom:5px;">🔼 上行最高预测 (High 止盈参考)：</div>
+            <div class="value">
+                🟢 高概率 (80% 达标): <span class="green">$${(open * (1 + v20)).toFixed(2)}</span> (+${(v20*100).toFixed(1)}%)<br>
+                🔵 中概率 (50% 核心): <span class="blue">$${(open * (1 + v50)).toFixed(2)}</span> (+${(v50*100).toFixed(1)}%)<br>
+                🟡 低概率 (25% 走强): <span class="yellow">$${(open * (1 + v75)).toFixed(2)}</span> (+${(v75*100).toFixed(1)}%)<br>
+                🔴 极低率 (10% 暴走): <span class="red">$${(open * (1 + v90)).toFixed(2)}</span> (+${(v90*100).toFixed(1)}%)
+            </div>
+        </div>
+        <div class="box">
+            <div class="title" style="color:#f43f5e; font-weight:bold; margin-bottom:5px;">🔽 下行最低预测 (Low 支撑抄底)：</div>
+            <div class="value">
+                🟢 高概率 (80% 踩到): <span class="green">$${(open * (1 - v20)).toFixed(2)}</span> (-${(v20*100).toFixed(1)}%)<br>
+                🔵 中概率 (50% 正常): <span class="blue">$${(open * (1 - v50)).toFixed(2)}</span> (-${(v50*100).toFixed(1)}%)<br>
+                🟡 低概率 (25% 恐慌): <span class="yellow">$${(open * (1 - v75)).toFixed(2)}</span> (-${(v75*100).toFixed(1)}%)<br>
+                🔴 极低率 (10% 深蹲): <span class="red">$${(open * (1 - v90)).toFixed(2)}</span> (-${(v90*100).toFixed(1)}%)
+            </div>
+        </div>
+    `;
 }
 
-let p20 = percentile(rData,20);
-let p50 = percentile(rData,50);
-let p70 = percentile(rData,70);
-let p80 = percentile(rData,80);
-let p90 = percentile(rData,90);
+// ====================================
+// 功能4：目标收益价格计算
+// ====================================
+function calc4(){
+    let buy = +document.getElementById('target_buy').value;
+    let pct = +document.getElementById('target_pct').value;
+    if(!buy || !pct) return;
 
-document.getElementById("result3").innerHTML = `
+    document.getElementById('result4').innerHTML = `
+        <div class="box">
+            <div class="title">📈 上涨 ${pct}% 目标价</div>
+            <div class="value green">$${(buy * (1 + pct / 100)).toFixed(2)}</div>
+        </div>
+        <div class="box">
+            <div class="title">📉 下跌 ${pct}% 止损价</div>
+            <div class="value red">$${(buy * (1 - pct / 100)).toFixed(2)}</div>
+        </div>
+    `;
+}
 
-<div class="box">
-<div class="title">🔵 20%</div>
-<div class="value">${(open*(1+p20)).toFixed(2)}</div>
-</div>
+// ====================================
+// 功能5：持仓盈亏与汇率换算
+// ====================================
+function calc5(){
+    let buy = +document.getElementById('buy').value;
+    let sell = +document.getElementById('sell').value;
+    let shares = +document.getElementById('shares').value;
+    let fx = +document.getElementById('fx').value;
 
-<div class="box">
-<div class="title">🟢 50%</div>
-<div class="value">${(open*(1+p50)).toFixed(2)}</div>
-</div>
+    if(!buy || !sell || !shares || !fx) return;
 
-<div class="box">
-<div class="title">🟡 70% ⭐</div>
-<div class="value">${(open*(1+p70)).toFixed(2)}</div>
-</div>
+    let profitUSD = (sell - buy) * shares;
+    let profitMYR = profitUSD * fx;
+    let pct = ((sell - buy) / buy) * 100;
+    let isWin = profitUSD >= 0;
+    let colorClass = isWin ? "green" : "red";
 
-<div class="box">
-<div class="title">🟠 80%</div>
-<div class="value">${(open*(1+p80)).toFixed(2)}</div>
-</div>
-
-<div class="box">
-<div class="title">🔴 90%</div>
-<div class="value">${(open*(1+p90)).toFixed(2)}</div>
-</div>
-
-`;
+    document.getElementById('result5').innerHTML = `
+        <div class="box">
+            <div class="title">价格涨跌幅</div>
+            <div class="value ${colorClass}">${pct.toFixed(2)}%</div>
+        </div>
+        <div class="box">
+            <div class="title">预估净收益 (USD)</div>
+            <div class="value ${colorClass}">${isWin ? '' : '-'}$${Math.abs(profitUSD).toFixed(2)}</div>
+        </div>
+        <div class="box">
+            <div class="title">折合马币 (MYR)</div>
+            <div class="value ${colorClass}">${isWin ? '' : '-'}RM ${Math.abs(profitMYR).toFixed(2)}</div>
+        </div>
+    `;
 }
 
 </script>
