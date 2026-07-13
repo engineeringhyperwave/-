@@ -1,268 +1,272 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>持仓盈亏换算器</title>
+<title>TQQQ & SQQQ 双向预测与仓位盈利计算器</title>
 
 <style>
-body {
-    font-family: 'PingFang SC', -apple-system, sans-serif;
-    background-color: #0b0f19;
-    color: #f1f5f9;
-    padding: 15px;
-    max-width: 800px;
-    margin: 0 auto;
+/* 保持与你的主页完全一致的暗黑极客风 CSS 样式 */
+body{
+    margin:0;
+    padding:12px;
+    background:#0b1120;
+    color:#f1f5f9;
+    font-family:Arial;
 }
 
-/* 顶部跳转 */
-.header-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 25px;
+.container{
+    max-width:650px;
+    margin:auto;
 }
 
-.btn-group {
-    display: flex;
-    gap: 10px;
+.header-container{
+    margin-top: 10px;
+    margin-bottom: 12px;
 }
 
-/* 🔥 更圆润按钮 */
-.back-btn {
-    flex: 1;
-    text-align: center;
-    background-color: #1e293b;
-    color: #94a3b8;
-    border: 1px solid #334155;
-    padding: 10px 12px;
-    border-radius: 14px;   /* ← 关键：6 → 14 */
-    text-decoration: none;
+.btn-group{
+    display:flex;
+    gap:8px;
+}
+
+.back-btn{
+    flex:1;
+    text-align:center;
+    padding:10px;
+    font-size:13px;
+    background:rgba(56,189,248,0.1);
+    border:1px solid #38bdf8;
+    color:#38bdf8;
+    border-radius:10px;
+    text-decoration:none;
+}
+
+h1{
+    text-align:center;
+    color:#38bdf8;
+    font-size: 24px;
+}
+
+h2{
+    margin: 0 0 10px 0;
+    font-size: 18px;
+}
+
+.card{
+    background:#1e293b;
+    padding:16px;
+    border-radius:15px;
+    margin-top:16px;
+}
+
+.grid-3{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 5px;
+}
+
+label{
+    display:block;
+    margin-top:10px;
+    color:#94a3b8;
+    font-size:12px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin-top:4px;
+    border-radius:8px;
+    border:none;
+    background:#0f172a;
+    color:white;
+    font-size:14px;
+    box-sizing: border-box;
+}
+
+button.calc-btn{
+    width:100%;
+    padding:12px;
+    margin-top:12px;
+    border:none;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
+    font-size: 14px;
+}
+
+.tqqq-btn { background: #22c55e; color: white; }
+.sqqq-btn { background: #ef4444; color: white; }
+
+.box{
+    background:#0f172a;
+    padding:12px;
+    margin-top:10px;
+    border-radius:10px;
+    border:1px solid #334155;
+}
+
+.sub-title{
+    font-size:12px;
+    color:#94a3b8;
     font-weight: bold;
-    transition: all 0.2s ease;
+    margin-top: 8px;
 }
 
-.back-btn:hover {
-    background-color: #334155;
-    transform: translateY(-1px);
+.value{
+    font-size:14px;
+    font-weight:normal;
+    margin-top:4px;
+    line-height: 1.6;
 }
 
-/* 🔥 卡片更“软” */
-.card {
-    background-color: #1e293b;
-    border-radius: 18px;   /* ← 12 → 18 */
-    padding: 22px;
-    border: 1px solid rgba(148,163,184,0.15);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-}
-
-/* 标题更柔和 */
-h2 {
-    color: #34d399;
-    margin-top: 0;
-    border-left: 4px solid #34d399;
-    padding-left: 10px;
-    border-radius: 4px;
-}
-
-/* 输入框升级圆润 */
-input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 12px;   /* ← 6 → 12 */
-    border: 1px solid #334155;
-    background: #0f172a;
-    color: white;
-    margin-bottom: 10px;
-    transition: all 0.2s ease;
-}
-
-/* 🔥 输入框聚焦效果 */
-input:focus {
-    outline: none;
-    border-color: #38bdf8;
-    box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
-}
-
-/* 结果框更柔和 */
-.result-highlight {
-    margin-top: 15px;
-    padding: 16px;
-    border-radius: 14px;  /* ← 更圆 */
-    border: 1px dashed rgba(148,163,184,0.25);
-    text-align: center;
-    font-size: 1.1rem;
-    background: rgba(15,23,42,0.6);
-}
-
-.badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 78px;   /* 🔥关键：变“格子” */
-    padding: 6px 10px;
-
-    border-radius: 8px; /* 方，不圆 */
-    font-weight: 700;
-    font-size: 0.95rem;
-
-    border: 1px solid;
-    background: rgba(255,255,255,0.03);
-
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-
-.badge-green {
-    color: #34d399;
-    background: rgba(52, 211, 153, 0.08);
-    border-color: rgba(52, 211, 153, 0.3);
-}
-
-.badge-red {
-    color: #f43f5e;
-    background: rgba(244, 63, 94, 0.08);
-    border-color: rgba(244, 63, 94, 0.3);
-}
-
-/* PC优化 */
-@media(min-width:600px){
-    .header-container{
-        flex-direction:row;
-        align-items:center;
-    }
-    .btn-group{
-        flex:1;
-    }
-}
+.green{color:#4ade80;}
+.blue{color:#38bdf8;}
+.yellow{color:#fbbf24;}
+.red{color:#ef4444;}
 </style>
 </head>
 
 <body>
 
-<!-- 顶部跳转 -->
+<div class="container">
+
 <div class="header-container">
     <div class="btn-group">
         <a href="index.html" class="back-btn">⬅ 返回首页</a>
-        <a href="3.html" class="back-btn">📚记录/笔记 ➡</a>
+        <a href="3.html" class="back-btn">📚 记录/笔记 ➡</a>
     </div>
 </div>
 
-<div class="card">
-    <h2>目标收益价格计算器</h2>
+<h1>📈 杠杆 ETF 上下看盘与盈利计算</h1>
 
-    <label>买入价格 (USD)</label>
-    <input type="number" id="target_buy" value="73.07" oninput="calcTarget()">
-
-    <label>目标涨跌幅 (%)</label>
-    <input type="number" id="target_pct" value="2.3" oninput="calcTarget()">
-
-    <div class="result-highlight" id="target_result">
-        --
+<div class="card" style="border-top: 5px solid #22c55e;">
+    <h2 class="green">🟢 TQQQ (3倍做多) 预测与仓位</h2>
+    
+    <div class="grid-3">
+        <div>
+            <label>今日开盘价</label>
+            <input type="number" id="tqqq_open" value="76.80" step="0.01">
+        </div>
+        <div>
+            <label>我的买入价</label>
+            <input type="number" id="tqqq_buy" value="76.00" step="0.01">
+        </div>
+        <div>
+            <label>持股数量</label>
+            <input type="number" id="tqqq_shares" value="100">
+        </div>
     </div>
+    
+    <label>当前转换汇率 (USD ➔ MYR)</label>
+    <input type="number" id="tqqq_fx" value="4.07" step="0.01">
+
+    <button class="calc-btn tqqq-btn" onclick="calcTQQQ()">计算 TQQQ 预测与预期盈利</button>
+    <div id="tqqq_result"></div>
 </div>
 
-<!-- 模块4：持仓盈亏 -->
-<div class="card">
-    <h2>持仓盈亏与汇率换算</h2>
-
-    <label>买入价格 (USD)</label>
-    <input type="number" id="buy" value="75.27" oninput="calc()">
-
-    <label>持股数量</label>
-    <input type="number" id="shares" value="11" oninput="calc()">
-
-    <label>卖出价格 (USD)</label>
-    <input type="number" id="sell" value="76.02" oninput="calc()">
-
-    <label>汇率 (USD → MYR)</label>
-    <input type="number" id="fx" value="4.06" oninput="calc()">
-
-    <div class="result-highlight" id="result">
-        --
+<div class="card" style="border-top: 5px solid #ef4444;">
+    <h2 class="red">🔴 SQQQ (3倍做空) 预测与仓位</h2>
+    
+    <div class="grid-3">
+        <div>
+            <label>今日开盘价</label>
+            <input type="number" id="sqqq_open" value="12.50" step="0.01">
+        </div>
+        <div>
+            <label>我的买入价</label>
+            <input type="number" id="sqqq_buy" value="12.30" step="0.01">
+        </div>
+        <div>
+            <label>持股数量</label>
+            <input type="number" id="sqqq_shares" value="500">
+        </div>
     </div>
+    
+    <label>当前转换汇率 (USD ➔ MYR)</label>
+    <input type="number" id="sqqq_fx" value="4.07" step="0.01">
+
+    <button class="calc-btn sqqq-btn" onclick="calcSQQQ()">计算 SQQQ 预测与预期盈利</button>
+    <div id="sqqq_result"></div>
+</div>
+
 </div>
 
 <script>
-function calc(){
-    const buy = parseFloat(document.getElementById('buy').value);
-    const sell = parseFloat(document.getElementById('sell').value);
-    const shares = parseFloat(document.getElementById('shares').value);
-    const fx = parseFloat(document.getElementById('fx').value);
+// 核心独立算法数据
+const hDataTQQQ = [0.011, 0.0235, 0.035, 0.048];
+const lDataTQQQ = [0.012, 0.0245, 0.038, 0.052];
 
-    const box = document.getElementById('result');
+const hDataSQQQ = [0.013, 0.0265, 0.040, 0.055];
+const lDataSQQQ = [0.014, 0.0285, 0.043, 0.059];
 
-    if(!buy || !sell || !shares || !fx){
-        box.innerHTML = "--";
-        box.className = "result-highlight";
-        return;
-    }
-
-    const profitUSD = (sell - buy) * shares;
-    const profitMYR = profitUSD * fx;
-    const pct = ((sell - buy) / buy) * 100;
-    const isWin = profitUSD >= 0;
-
-    box.innerHTML = `
-        <div style="margin-bottom:6px;">
-            价格变化：
-            <span class="badge ${isWin ? 'badge-green' : 'badge-red'}">
-                ${pct.toFixed(2)}%
-            </span>
-        </div>
-
-        <div>
-            ${isWin ? "盈利" : "亏损"}：
-            <span class="badge ${isWin ? 'badge-green' : 'badge-red'}">
-                $${Math.abs(profitUSD).toFixed(2)} USD
-            </span>
-            <span class="badge ${isWin ? 'badge-green' : 'badge-red'}">
-                RM ${Math.abs(profitMYR).toFixed(2)}
-            </span>
-        </div>
-    `;
-
-    box.style.borderColor = isWin ? "#34d399" : "#f43f5e";
+// 统一盈利输出格式
+function getProfitStr(targetPrice, buyPrice, shares, fx) {
+    if (!buyPrice || !shares) return `<span style="color:#64748b;">(未输入买入仓位)</span>`;
+    let profitUSD = (targetPrice - buyPrice) * shares;
+    let profitMYR = profitUSD * fx;
+    let color = profitUSD >= 0 ? 'green' : 'red';
+    let sign = profitUSD >= 0 ? '+' : '';
+    return `<span class="${color}">目标$${targetPrice.toFixed(2)} [预期盈利: ${sign}$${profitUSD.toFixed(2)} USD / ${sign}RM ${profitMYR.toFixed(2)} MYR]</span>`;
 }
 
+// 🟢 计算 TQQQ
+function calcTQQQ() {
+    let open = +document.getElementById("tqqq_open").value;
+    let buy = +document.getElementById("tqqq_buy").value;
+    let shares = +document.getElementById("tqqq_shares").value;
+    let fx = +document.getElementById("tqqq_fx").value;
+    if(!open || open <= 0) return;
 
-function calcTarget(){
-    const buy = parseFloat(document.getElementById('target_buy').value);
-    const pct = parseFloat(document.getElementById('target_pct').value);
-
-    const box = document.getElementById('target_result');
-
-    if(!buy || !pct){
-        box.innerHTML = "--";
-        return;
-    }
-
-    const targetPrice = buy * (1 + pct / 100);
-    const lossPrice = buy * (1 - pct / 100);
-
-    box.innerHTML = `
-        <div style="margin-bottom:6px;">
-            📈 上涨 ${pct}%：
-            <span class="badge badge-green">
-                $${targetPrice.toFixed(2)}
-            </span>
-        </div>
-
-        <div>
-            📉 下跌 ${pct}%：
-            <span class="badge badge-red">
-                $${lossPrice.toFixed(2)}
-            </span>
+    document.getElementById("tqqq_result").innerHTML = `
+        <div class="box">
+            <div class="sub-title" style="color:#38bdf8;">🔼 上行最高预测及对应盈利 (High 止盈参考)：</div>
+            <div class="value">
+                🟢 高概率 (80%达标): ${getProfitStr(open * (1 + hDataTQQQ[0]), buy, shares, fx)}<br>
+                🔵 中概率 (50%核心): ${getProfitStr(open * (1 + hDataTQQQ[1]), buy, shares, fx)}<br>
+                🟡 低概率 (25%走强): ${getProfitStr(open * (1 + hDataTQQQ[2]), buy, shares, fx)}<br>
+                🔴 极低率 (10%暴走): ${getProfitStr(open * (1 + hDataTQQQ[3]), buy, shares, fx)}
+            </div>
+            <div class="sub-title" style="color:#f43f5e;">🔽 下行最低预测支撑 (Low 抄底参考)：</div>
+            <div class="value">
+                🟢 高概率 (80%踩到): <span class="green">$${(open * (1 - lDataTQQQ[0])).toFixed(2)}</span> (-${(lDataTQQQ[0]*100).toFixed(2)}%)<br>
+                🔵 中概率 (50%正常): <span class="blue">$${(open * (1 - lDataTQQQ[1])).toFixed(2)}</span> (-${(lDataTQQQ[1]*100).toFixed(2)}%)<br>
+                🟡 低概率 (25%恐慌): <span class="yellow">$${(open * (1 - lDataTQQQ[2])).toFixed(2)}</span> (-${(lDataTQQQ[2]*100).toFixed(2)}%)<br>
+                🔴 极低率 (10%深蹲): <span class="red">$${(open * (1 - lDataTQQQ[3])).toFixed(2)}</span> (-${(lDataTQQQ[3]*100).toFixed(2)}%)
+            </div>
         </div>
     `;
 }
 
+// 🔴 计算 SQQQ
+function calcSQQQ() {
+    let open = +document.getElementById("sqqq_open").value;
+    let buy = +document.getElementById("sqqq_buy").value;
+    let shares = +document.getElementById("sqqq_shares").value;
+    let fx = +document.getElementById("sqqq_fx").value;
+    if(!open || open <= 0) return;
 
-/* ✅ 只保留一个 onload（修复你原来的覆盖问题） */
-window.onload = function() {
-    calc();
-    calcTarget();
-};
+    document.getElementById("sqqq_result").innerHTML = `
+        <div class="box">
+            <div class="sub-title" style="color:#38bdf8;">🔼 上行最高预测及对应盈利 (High 止盈参考)：</div>
+            <div class="value">
+                🟢 高概率 (80%达标): ${getProfitStr(open * (1 + hDataSQQQ[0]), buy, shares, fx)}<br>
+                🔵 中概率 (50%核心): ${getProfitStr(open * (1 + hDataSQQQ[1]), buy, shares, fx)}<br>
+                🟡 低概率 (25%走强): ${getProfitStr(open * (1 + hDataSQQQ[2]), buy, shares, fx)}<br>
+                🔴 极低率 (10%暴走): ${getProfitStr(open * (1 + hDataSQQQ[3]), buy, shares, fx)}
+            </div>
+            <div class="sub-title" style="color:#f43f5e;">🔽 下行最低预测支撑 (Low 抄底参考)：</div>
+            <div class="value">
+                🟢 高概率 (80%踩到): <span class="green">$${(open * (1 - lDataSQQQ[0])).toFixed(2)}</span> (-${(lDataSQQQ[0]*100).toFixed(2)}%)<br>
+                🔵 中概率 (50%正常): <span class="blue">$${(open * (1 - lDataSQQQ[1])).toFixed(2)}</span> (-${(lDataSQQQ[1]*100).toFixed(2)}%)<br>
+                🟡 低概率 (25%恐慌): <span class="yellow">$${(open * (1 - lDataSQQQ[2])).toFixed(2)}</span> (-${(lDataSQQQ[2]*100).toFixed(2)}%)<br>
+                🔴 极低率 (10%深蹲): <span class="red">$${(open * (1 - lDataSQQQ[3])).toFixed(2)}</span> (-${(lDataSQQQ[3]*100).toFixed(2)}%)
+            </div>
+        </div>
+    `;
+}
 </script>
 
 </body>
