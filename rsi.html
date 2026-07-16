@@ -1,280 +1,550 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TQQQ & SQQQ 双向预测与仓位盈利计算器</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TQQQ & SQQQ 双向预测 + 短线多空评分</title>
 
-<style>
-/* 保持与你的主页完全一致的暗黑极客风 CSS 样式 */
-body{
-    margin:0;
-    padding:12px;
-    background:#0b1120;
-    color:#f1f5f9;
-    font-family:Arial;
-}
+  <style>
+    /* ---------- 全局暗黑极客风 ---------- */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 12px;
+      background: #0b1120;
+      color: #f1f5f9;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+    .container {
+      max-width: 680px;
+      margin: auto;
+    }
 
-.container{
-    max-width:650px;
-    margin:auto;
-}
+    .header-container {
+      margin-top: 10px;
+      margin-bottom: 12px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    .back-btn {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      font-size: 13px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      border-radius: 10px;
+      text-decoration: none;
+    }
 
-.header-container{
-    margin-top: 10px;
-    margin-bottom: 12px;
-}
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+      font-size: 24px;
+      margin: 16px 0 4px 0;
+    }
+    .sub-title {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: bold;
+      margin-top: 8px;
+    }
 
-.btn-group{
-    display:flex;
-    gap:8px;
-}
+    h2 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+    .card {
+      background: #1e293b;
+      padding: 16px;
+      border-radius: 15px;
+      margin-top: 16px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 5px;
+    }
 
-.back-btn{
-    flex:1;
-    text-align:center;
-    padding:10px;
-    font-size:13px;
-    background:rgba(56,189,248,0.1);
-    border:1px solid #38bdf8;
-    color:#38bdf8;
-    border-radius:10px;
-    text-decoration:none;
-}
+    label {
+      display: block;
+      margin-top: 10px;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 4px;
+      border-radius: 8px;
+      border: none;
+      background: #0f172a;
+      color: white;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    select option { background: #1e293b; }
 
-h1{
-    text-align:center;
-    color:#38bdf8;
-    font-size: 24px;
-}
+    button.calc-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .tqqq-btn { background: #22c55e; color: white; }
+    .sqqq-btn { background: #ef4444; color: white; }
+    .score-btn { background: #38bdf8; color: #0b1120; }
 
-h2{
-    margin: 0 0 10px 0;
-    font-size: 18px;
-}
+    .box {
+      background: #0f172a;
+      padding: 12px;
+      margin-top: 14px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
 
-.card{
-    background:#1e293b;
-    padding:16px;
-    border-radius:15px;
-    margin-top:16px;
-}
+    .value {
+      font-size: 14px;
+      font-weight: normal;
+      margin-top: 4px;
+      line-height: 1.7;
+    }
+    .green { color: #4ade80; }
+    .blue { color: #38bdf8; }
+    .yellow { color: #fbbf24; }
+    .red { color: #ef4444; }
+    .gray { color: #94a3b8; }
 
-.grid-3{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 5px;
-}
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .mt-1 { margin-top: 6px; }
+    .mb-1 { margin-bottom: 6px; }
 
-label{
-    display:block;
-    margin-top:10px;
-    color:#94a3b8;
-    font-size:12px;
-}
+    /* 评分专用样式 */
+    .score-big {
+      font-size: 2.2rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .score-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      text-align: center;
+    }
+    .signal-badge {
+      display: inline-block;
+      padding: 0.2rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .signal-buy { background: #22c55e22; color: #4ade80; border: 1px solid #22c55e66; }
+    .signal-sell { background: #ef444422; color: #ef4444; border: 1px solid #ef444466; }
+    .signal-neutral { background: #47556944; color: #94a3b8; border: 1px solid #47556966; }
+    .signal-strongbuy { background: #22c55e44; color: #4ade80; border: 2px solid #22c55e; }
+    .signal-strongsell { background: #ef444444; color: #ef4444; border: 2px solid #ef4444; }
 
-input{
-    width:100%;
-    padding:10px;
-    margin-top:4px;
-    border-radius:8px;
-    border:none;
-    background:#0f172a;
-    color:white;
-    font-size:14px;
-    box-sizing: border-box;
-}
-
-button.calc-btn{
-    width:100%;
-    padding:12px;
-    margin-top:12px;
-    border:none;
-    border-radius:10px;
-    font-weight:bold;
-    cursor:pointer;
-    font-size: 14px;
-}
-
-.tqqq-btn { background: #22c55e; color: white; }
-.sqqq-btn { background: #ef4444; color: white; }
-
-.box{
-    background:#0f172a;
-    padding:12px;
-    margin-top:14px;
-    border-radius:10px;
-    border:1px solid #334155;
-}
-
-.sub-title{
-    font-size:12px;
-    color:#94a3b8;
-    font-weight: bold;
-    margin-top: 8px;
-}
-
-.value{
-    font-size:14px;
-    font-weight:normal;
-    margin-top:4px;
-    line-height: 1.7;
-}
-
-.green{color:#4ade80;}
-.blue{color:#38bdf8;}
-.yellow{color:#fbbf24;}
-.red{color:#ef4444;}
-</style>
+    .rule-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid #1e293b;
+      font-size: 0.85rem;
+    }
+    .rule-item:last-child { border-bottom: none; }
+  </style>
 </head>
 
 <body>
-
 <div class="container">
 
-<div class="header-container">
+  <!-- ====== 顶部导航 ====== -->
+  <div class="header-container">
     <div class="btn-group">
-        <a href="index.html" class="back-btn">⬅ 返回首页</a>
-        <a href="3.html" class="back-btn">📚 记录/笔记 ➡</a>
+      <a href="index.html" class="back-btn">⬅ 返回首页</a>
+      <a href="3.html" class="back-btn">📚 记录/笔记 ➡</a>
     </div>
-</div>
+  </div>
 
-<h1>📈 杠杆 ETF 上下看盘与盈利计算</h1>
+  <h1>📈 杠杆 ETF + 短线多空评分</h1>
 
-<!-- 🟢 TQQQ 卡片 -->
-<div class="card" style="border-top: 5px solid #22c55e;">
+  <!-- ========================================================= -->
+  <!-- 区块 A：原有的 TQQQ / SQQQ 计算器                       -->
+  <!-- ========================================================= -->
+
+  <!-- 🟢 TQQQ 卡片 -->
+  <div class="card" style="border-top: 5px solid #22c55e;">
     <h2 class="green">🟢 TQQQ (3倍做多) 预测与仓位</h2>
-    
+
     <div class="grid-3">
-        <div>
-            <label>今日开盘价</label>
-            <input type="number" id="tqqq_open" value="76.80" step="0.01">
-        </div>
-        <div>
-            <label>我的买入价</label>
-            <input type="number" id="tqqq_buy" value="76.00" step="0.01">
-        </div>
-        <div>
-            <label>持股数量</label>
-            <input type="number" id="tqqq_shares" value="100">
-        </div>
+      <div>
+        <label>今日开盘价</label>
+        <input type="number" id="tqqq_open" value="76.80" step="0.01">
+      </div>
+      <div>
+        <label>我的买入价</label>
+        <input type="number" id="tqqq_buy" value="76.00" step="0.01">
+      </div>
+      <div>
+        <label>持股数量</label>
+        <input type="number" id="tqqq_shares" value="100">
+      </div>
     </div>
-    
+
     <label>当前转换汇率 (USD ➔ MYR)</label>
     <input type="number" id="tqqq_fx" value="4.07" step="0.01">
 
     <button class="calc-btn tqqq-btn" onclick="calcTQQQ()">计算 TQQQ 预测与预期盈利</button>
     <div id="tqqq_result"></div>
-</div>
+  </div>
 
-<!-- 🔴 SQQQ 卡片 -->
-<div class="card" style="border-top: 5px solid #ef4444;">
+  <!-- 🔴 SQQQ 卡片 -->
+  <div class="card" style="border-top: 5px solid #ef4444;">
     <h2 class="red">🔴 SQQQ (3倍做空) 预测与仓位</h2>
-    
+
     <div class="grid-3">
-        <div>
-            <label>今日开盘价</label>
-            <input type="number" id="sqqq_open" value="12.50" step="0.01">
-        </div>
-        <div>
-            <label>我的买入价</label>
-            <input type="number" id="sqqq_buy" value="12.30" step="0.01">
-        </div>
-        <div>
-            <label>持股数量</label>
-            <input type="number" id="sqqq_shares" value="500">
-        </div>
+      <div>
+        <label>今日开盘价</label>
+        <input type="number" id="sqqq_open" value="12.50" step="0.01">
+      </div>
+      <div>
+        <label>我的买入价</label>
+        <input type="number" id="sqqq_buy" value="12.30" step="0.01">
+      </div>
+      <div>
+        <label>持股数量</label>
+        <input type="number" id="sqqq_shares" value="500">
+      </div>
     </div>
-    
+
     <label>当前转换汇率 (USD ➔ MYR)</label>
     <input type="number" id="sqqq_fx" value="4.07" step="0.01">
 
     <button class="calc-btn sqqq-btn" onclick="calcSQQQ()">计算 SQQQ 预测与预期盈利</button>
     <div id="sqqq_result"></div>
-</div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 区块 B：新增 短线多空评分计算器 (精简版 · 加权评分)     -->
+  <!-- ========================================================= -->
+
+  <div class="card" style="border-top: 5px solid #38bdf8;">
+    <h2 style="color:#38bdf8;">⚡ 短线多空评分 <span style="font-size:0.7rem; font-weight:400; color:#94a3b8;">(1分钟K · 加权总分 -10 ~ +10)</span></h2>
+
+    <div class="grid-3">
+      <div>
+        <label>当前价格 (Last)</label>
+        <input type="number" id="sc_last" value="74.20" step="0.01">
+      </div>
+      <div>
+        <label>MA5</label>
+        <input type="number" id="sc_ma5" value="74.00" step="0.01">
+      </div>
+      <div>
+        <label>MA10</label>
+        <input type="number" id="sc_ma10" value="73.80" step="0.01">
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div>
+        <label>前5K最高</label>
+        <input type="number" id="sc_high5" value="74.80" step="0.01">
+      </div>
+      <div>
+        <label>前5K最低</label>
+        <input type="number" id="sc_low5" value="73.50" step="0.01">
+      </div>
+      <div>
+        <label>前10K最高</label>
+        <input type="number" id="sc_high10" value="75.00" step="0.01">
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div>
+        <label>前10K最低</label>
+        <input type="number" id="sc_low10" value="73.20" step="0.01">
+      </div>
+      <div>
+        <label>RSI(5)</label>
+        <input type="number" id="sc_rsi" value="55" step="0.1">
+      </div>
+      <div>
+        <label>ATR(5)</label>
+        <input type="number" id="sc_atr" value="1.20" step="0.01">
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div>
+        <label>VWAP</label>
+        <input type="number" id="sc_vwap" value="73.90" step="0.01">
+      </div>
+      <div>
+        <label>前5K均量 (vol)</label>
+        <input type="number" id="sc_vol" value="250000" step="0.01">
+      </div>
+      <div style="display:flex; align-items:flex-end;">
+        <button class="calc-btn score-btn" onclick="calcScore()" style="margin-top:0;">🧮 计算评分</button>
+      </div>
+    </div>
+
+    <!-- 结果显示区 -->
+    <div id="scoreResult">
+      <div class="box" style="margin-top:12px;">
+        <div class="flex-between">
+          <span class="sub-title" style="margin:0;">📊 综合评分</span>
+          <span id="scoreTotal" style="font-size:1.8rem; font-weight:700; color:#38bdf8;">+0.0</span>
+        </div>
+        <div id="scoreAdvice" style="text-align:center; margin: 4px 0 8px 0;">
+          <span class="signal-badge signal-neutral">⚪ 观望</span>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; font-size:0.85rem;">
+          <span>📗 买入信号: <strong id="sc_buyCount" style="color:#4ade80;">0</strong></span>
+          <span>📕 卖出信号: <strong id="sc_sellCount" style="color:#ef4444;">0</strong></span>
+          <span>⚪ 观望: <strong id="sc_neutralCount" style="color:#94a3b8;">0</strong></span>
+          <span>🛑 止损参考: <strong id="sc_stopLoss" style="color:#fbbf24;">-</strong></span>
+        </div>
+      </div>
+
+      <div class="box" style="margin-top:10px;">
+        <div class="sub-title" style="margin:0 0 4px 0;">📋 各规则信号 (加权)</div>
+        <div id="sc_ruleList" style="font-size:0.85rem;">
+          <!-- 动态生成 -->
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>
 
 <script>
-// 核心独立算法数据
-const hDataTQQQ = [0.011, 0.0235, 0.035, 0.048];
-const lDataTQQQ = [0.012, 0.0245, 0.038, 0.052];
+  // =============================================================
+  // 区块 A：TQQQ / SQQQ 预测计算（原有逻辑，完全保留）
+  // =============================================================
 
-const hDataSQQQ = [0.013, 0.0265, 0.040, 0.055];
-const lDataSQQQ = [0.014, 0.0285, 0.043, 0.059];
+  const hDataTQQQ = [0.011, 0.0235, 0.035, 0.048];
+  const lDataTQQQ = [0.012, 0.0245, 0.038, 0.052];
+  const hDataSQQQ = [0.013, 0.0265, 0.040, 0.055];
+  const lDataSQQQ = [0.014, 0.0285, 0.043, 0.059];
 
-// 核心渲染函数：分离目标价（蓝色）与预期盈亏（红绿）
-function renderLine(targetPrice, buyPrice, shares, fx) {
+  function renderLine(targetPrice, buyPrice, shares, fx) {
     const targetStr = `<span class="blue">$${targetPrice.toFixed(2)}</span>`;
-    
     if (!buyPrice || !shares) {
-        return `${targetStr} <span style="color:#64748b; font-size:12px;">(未输入买入仓位)</span>`;
+      return `${targetStr} <span style="color:#64748b; font-size:12px;">(未输入买入仓位)</span>`;
     }
-    
     let profitUSD = (targetPrice - buyPrice) * shares;
     let profitMYR = profitUSD * fx;
     let color = profitUSD >= 0 ? 'green' : 'red';
     let sign = profitUSD >= 0 ? '+' : '';
-    
     return `${targetStr} <span class="${color}">[${sign}$${profitUSD.toFixed(2)} USD / ${sign}RM ${profitMYR.toFixed(2)} MYR]</span>`;
-}
+  }
 
-// 🟢 计算 TQQQ
-function calcTQQQ() {
+  function calcTQQQ() {
     let open = +document.getElementById("tqqq_open").value;
     let buy = +document.getElementById("tqqq_buy").value;
     let shares = +document.getElementById("tqqq_shares").value;
     let fx = +document.getElementById("tqqq_fx").value;
-    if(!open || open <= 0) return;
-
+    if (!open || open <= 0) return;
     document.getElementById("tqqq_result").innerHTML = `
-        <div class="box">
-            <div class="sub-title" style="color:#38bdf8;">🔼 上行最高预测及对应盈利 (High 止盈参考)：</div>
-            <div class="value">
-                🟢 高概率 (80%踩到) (+${(hDataTQQQ[0]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataTQQQ[0]), buy, shares, fx)}<br>
-                🔵 中概率 (50%正常) (+${(hDataTQQQ[1]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataTQQQ[1]), buy, shares, fx)}<br>
-                🟡 低概率 (25%恐慌) (+${(hDataTQQQ[2]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataTQQQ[2]), buy, shares, fx)}<br>
-                🔴 极低率 (10%深蹲) (+${(hDataTQQQ[3]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataTQQQ[3]), buy, shares, fx)}
-            </div>
-            <div class="sub-title" style="color:#f43f5e;">🔽 下行最低预测支撑及对应损益 (Low 抄底/止损参考)：</div>
-            <div class="value">
-                🟢 高概率 (80%踩到) (-${(lDataTQQQ[0]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataTQQQ[0]), buy, shares, fx)}<br>
-                🔵 中概率 (50%正常) (-${(lDataTQQQ[1]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataTQQQ[1]), buy, shares, fx)}<br>
-                🟡 低概率 (25%恐慌) (-${(lDataTQQQ[2]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataTQQQ[2]), buy, shares, fx)}<br>
-                🔴 极低率 (10%深蹲) (-${(lDataTQQQ[3]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataTQQQ[3]), buy, shares, fx)}
-            </div>
+      <div class="box">
+        <div class="sub-title" style="color:#38bdf8;">🔼 上行最高预测及对应盈利 (High 止盈参考)：</div>
+        <div class="value">
+          🟢 高概率 (80%踩到) (+${(hDataTQQQ[0]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataTQQQ[0]), buy, shares, fx)}<br>
+          🔵 中概率 (50%正常) (+${(hDataTQQQ[1]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataTQQQ[1]), buy, shares, fx)}<br>
+          🟡 低概率 (25%恐慌) (+${(hDataTQQQ[2]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataTQQQ[2]), buy, shares, fx)}<br>
+          🔴 极低率 (10%深蹲) (+${(hDataTQQQ[3]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataTQQQ[3]), buy, shares, fx)}
         </div>
+        <div class="sub-title" style="color:#f43f5e;">🔽 下行最低预测支撑及对应损益 (Low 抄底/止损参考)：</div>
+        <div class="value">
+          🟢 高概率 (80%踩到) (-${(lDataTQQQ[0]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataTQQQ[0]), buy, shares, fx)}<br>
+          🔵 中概率 (50%正常) (-${(lDataTQQQ[1]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataTQQQ[1]), buy, shares, fx)}<br>
+          🟡 低概率 (25%恐慌) (-${(lDataTQQQ[2]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataTQQQ[2]), buy, shares, fx)}<br>
+          🔴 极低率 (10%深蹲) (-${(lDataTQQQ[3]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataTQQQ[3]), buy, shares, fx)}
+        </div>
+      </div>
     `;
-}
+  }
 
-// 🔴 计算 SQQQ
-function calcSQQQ() {
+  function calcSQQQ() {
     let open = +document.getElementById("sqqq_open").value;
     let buy = +document.getElementById("sqqq_buy").value;
     let shares = +document.getElementById("sqqq_shares").value;
     let fx = +document.getElementById("sqqq_fx").value;
-    if(!open || open <= 0) return;
-
+    if (!open || open <= 0) return;
     document.getElementById("sqqq_result").innerHTML = `
-        <div class="box">
-            <div class="sub-title" style="color:#38bdf8;">🔼 上行最高预测及对应盈利 (High 止盈参考)：</div>
-            <div class="value">
-                🟢 高概率 (80%踩到) (+${(hDataSQQQ[0]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataSQQQ[0]), buy, shares, fx)}<br>
-                🔵 中概率 (50%正常) (+${(hDataSQQQ[1]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataSQQQ[1]), buy, shares, fx)}<br>
-                🟡 低概率 (25%恐慌) (+${(hDataSQQQ[2]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataSQQQ[2]), buy, shares, fx)}<br>
-                🔴 极低率 (10%深蹲) (+${(hDataSQQQ[3]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataSQQQ[3]), buy, shares, fx)}
-            </div>
-            <div class="sub-title" style="color:#f43f5e;">🔽 下行最低预测支撑及对应损益 (Low 抄底/止损参考)：</div>
-            <div class="value">
-                🟢 高概率 (80%踩到) (-${(lDataSQQQ[0]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataSQQQ[0]), buy, shares, fx)}<br>
-                🔵 中概率 (50%正常) (-${(lDataSQQQ[1]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataSQQQ[1]), buy, shares, fx)}<br>
-                🟡 低概率 (25%恐慌) (-${(lDataSQQQ[2]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataSQQQ[2]), buy, shares, fx)}<br>
-                🔴 极低率 (10%深蹲) (-${(lDataSQQQ[3]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataSQQQ[3]), buy, shares, fx)}
-            </div>
+      <div class="box">
+        <div class="sub-title" style="color:#38bdf8;">🔼 上行最高预测及对应盈利 (High 止盈参考)：</div>
+        <div class="value">
+          🟢 高概率 (80%踩到) (+${(hDataSQQQ[0]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataSQQQ[0]), buy, shares, fx)}<br>
+          🔵 中概率 (50%正常) (+${(hDataSQQQ[1]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataSQQQ[1]), buy, shares, fx)}<br>
+          🟡 低概率 (25%恐慌) (+${(hDataSQQQ[2]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataSQQQ[2]), buy, shares, fx)}<br>
+          🔴 极低率 (10%深蹲) (+${(hDataSQQQ[3]*100).toFixed(2)}%): ${renderLine(open * (1 + hDataSQQQ[3]), buy, shares, fx)}
         </div>
+        <div class="sub-title" style="color:#f43f5e;">🔽 下行最低预测支撑及对应损益 (Low 抄底/止损参考)：</div>
+        <div class="value">
+          🟢 高概率 (80%踩到) (-${(lDataSQQQ[0]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataSQQQ[0]), buy, shares, fx)}<br>
+          🔵 中概率 (50%正常) (-${(lDataSQQQ[1]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataSQQQ[1]), buy, shares, fx)}<br>
+          🟡 低概率 (25%恐慌) (-${(lDataSQQQ[2]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataSQQQ[2]), buy, shares, fx)}<br>
+          🔴 极低率 (10%深蹲) (-${(lDataSQQQ[3]*100).toFixed(2)}%): ${renderLine(open * (1 - lDataSQQQ[3]), buy, shares, fx)}
+        </div>
+      </div>
     `;
-}
+  }
+
+  // =============================================================
+  // 区块 B：短线多空评分计算器 (加权评分 -10 ~ +10)
+  // =============================================================
+
+  function calcScore() {
+    // 读取数据
+    const last = parseFloat(document.getElementById('sc_last').value) || 0;
+    const ma5 = parseFloat(document.getElementById('sc_ma5').value) || 0;
+    const ma10 = parseFloat(document.getElementById('sc_ma10').value) || 0;
+    const high5 = parseFloat(document.getElementById('sc_high5').value) || 0;
+    const low5 = parseFloat(document.getElementById('sc_low5').value) || 0;
+    const high10 = parseFloat(document.getElementById('sc_high10').value) || 0;
+    const low10 = parseFloat(document.getElementById('sc_low10').value) || 0;
+    const rsi = parseFloat(document.getElementById('sc_rsi').value) || 50;
+    const atr = parseFloat(document.getElementById('sc_atr').value) || 1;
+    const vwap = parseFloat(document.getElementById('sc_vwap').value) || 0;
+    const vol = parseFloat(document.getElementById('sc_vol').value) || 0;
+
+    // ----- 定义规则 (每条返回信号: 1, -1, 0) + 权重 -----
+    const rules = [
+      {
+        name: '价格 > MA5',
+        weight: 1,
+        signal: () => last > ma5 ? 1 : (last < ma5 ? -1 : 0)
+      },
+      {
+        name: '价格 > MA10',
+        weight: 1,
+        signal: () => last > ma10 ? 1 : (last < ma10 ? -1 : 0)
+      },
+      {
+        name: 'MA5 > MA10',
+        weight: 1,
+        signal: () => ma5 > ma10 ? 1 : (ma5 < ma10 ? -1 : 0)
+      },
+      {
+        name: '突破前5K',
+        weight: 1.5,
+        signal: () => last > high5 ? 1 : (last < low5 ? -1 : 0)
+      },
+      {
+        name: '突破前10K',
+        weight: 1.5,
+        signal: () => last > high10 ? 1 : (last < low10 ? -1 : 0)
+      },
+      {
+        name: 'RSI(5) 极端',
+        weight: 2,
+        signal: () => rsi < 25 ? 1 : (rsi > 75 ? -1 : 0)
+      },
+      {
+        name: '价格 > VWAP',
+        weight: 1.5,
+        signal: () => last > vwap ? 1 : (last < vwap ? -1 : 0)
+      },
+      {
+        name: 'ATR 超涨/超跌',
+        weight: 2,
+        signal: () => {
+          if (!ma5) return 0;
+          const diff = last - ma5;
+          if (diff > atr * 1.5) return -1;   // 超涨 → 偏空
+          if (diff < -atr * 1.5) return 1;    // 超跌 → 偏多
+          return 0;
+        }
+      }
+    ];
+
+    // 计算每条规则的信号和加权分数
+    let totalScore = 0;
+    let maxPossible = 0;
+    let results = rules.map(rule => {
+      const sig = rule.signal();
+      const weighted = sig * rule.weight;
+      totalScore += weighted;
+      maxPossible += rule.weight;
+      return {
+        name: rule.name,
+        signal: sig,
+        weight: rule.weight,
+        weighted: weighted
+      };
+    });
+
+    // 归一化到 -10 ~ +10
+    const normalized = maxPossible > 0 ? (totalScore / maxPossible) * 10 : 0;
+    const finalScore = Math.min(10, Math.max(-10, normalized));
+
+    // 统计
+    let buys = 0, sells = 0, neutrals = 0;
+    results.forEach(r => {
+      if (r.signal === 1) buys++;
+      else if (r.signal === -1) sells++;
+      else neutrals++;
+    });
+
+    // ---- 更新 UI ----
+    document.getElementById('scoreTotal').textContent = (finalScore >= 0 ? '+' : '') + finalScore.toFixed(1);
+
+    // 建议
+    const adviceEl = document.getElementById('scoreAdvice');
+    let adviceText = '⚪ 观望';
+    let cls = 'signal-neutral';
+    if (finalScore > 5) { adviceText = '📗 强烈偏多 / 买'; cls = 'signal-strongbuy'; }
+    else if (finalScore > 2) { adviceText = '📗 温和偏多'; cls = 'signal-buy'; }
+    else if (finalScore < -5) { adviceText = '📕 强烈偏空 / 卖'; cls = 'signal-strongsell'; }
+    else if (finalScore < -2) { adviceText = '📕 温和偏空'; cls = 'signal-sell'; }
+    adviceEl.innerHTML = `<span class="signal-badge ${cls}">${adviceText}</span>`;
+
+    document.getElementById('sc_buyCount').textContent = buys;
+    document.getElementById('sc_sellCount').textContent = sells;
+    document.getElementById('sc_neutralCount').textContent = neutrals;
+
+    // 止损参考: last - ATR
+    const stopLoss = last - atr;
+    document.getElementById('sc_stopLoss').textContent = stopLoss > 0 ? stopLoss.toFixed(2) : 'N/A';
+
+    // 规则列表
+    const listEl = document.getElementById('sc_ruleList');
+    listEl.innerHTML = results.map(r => {
+      let label = '观望 0';
+      let color = '#94a3b8';
+      if (r.signal === 1) { label = `买入 +${r.weight}`; color = '#4ade80'; }
+      else if (r.signal === -1) { label = `卖出 -${r.weight}`; color = '#ef4444'; }
+      return `<div class="rule-item">
+        <span>${r.name}</span>
+        <span style="color:${color}; font-weight:600;">${label}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // 页面加载后自动计算一次
+  window.onload = function() {
+    // 原有计算器默认显示
+    calcTQQQ();
+    calcSQQQ();
+    // 短线评分默认显示
+    calcScore();
+  };
 </script>
 
 </body>
